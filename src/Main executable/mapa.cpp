@@ -2752,7 +2752,7 @@ void AddHi( int x, int y1, int r, int h );
 void AverageHi( int x, int y1, int r );
 void PlanarHi( int x, int y1, int r );
 void delTrees( int x, int y, int r );
-void EditNatDeals( int x, int y, int r, const bool add);
+bool EditNatDeals( int x, int y, int r, const bool add);
 void addTrees( int x, int y, int r );
 extern int HiStyle;
 int Prop43( int y );
@@ -3086,6 +3086,7 @@ __declspec( dllexport ) void SetExComm( char* Data, int size )
 	}
 }
 
+void PictureCordons();
 //Assign orders based on mouse actions
 void HandleMouse( int x, int y )
 {
@@ -3677,8 +3678,15 @@ void HandleMouse( int x, int y )
 
 		if (!mini && HeightEditMode == 50 && (Lpressed || Rpressed))
 		{
-			EditNatDeals(xmx, ysy, ReliefBrush << 4, Lpressed);
-			CreateMiniMap();
+			bool changed = EditNatDeals(xmx, ysy, ReliefBrush << 4, Lpressed);
+			if (changed)
+			{
+				PeaceTimeLeft = 1;
+				PictureCordons();
+				PeaceTimeLeft = 0;
+
+				CreateMiniMap();
+			}
 		}
 
 		if (HeightEditMode == 2)

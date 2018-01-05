@@ -3946,7 +3946,10 @@ void InitCordonIDX()
 	}
 }
 
-void EditNatDeals(int x, const int y1, int r, const bool add)
+// Edit the Nat Deals at the specified Point
+// x and y1 have to be mouse specific values
+// returns wether something has changed or not
+bool EditNatDeals(int x, const int y1, int r, const bool add)
 {
 	if (!NatDeals)
 	{
@@ -3960,7 +3963,7 @@ void EditNatDeals(int x, const int y1, int r, const bool add)
 
 	if (x <= 0 || y <= 0 || x >= NATLX || y >= NATLX)
 	{
-		return;
+		return false;
 	}
 
 	r = r >> 6;
@@ -3991,12 +3994,7 @@ void EditNatDeals(int x, const int y1, int r, const bool add)
 		}
 	}
 
-	if (changed) 
-	{
-		PeaceTimeLeft = 1;
-		PictureCordons();
-		PeaceTimeLeft = 0;
-	}
+	return changed;
 };
 
 bool GetRandomPoint( short* x, short* y, byte TypeStart, byte TypeEnd )
@@ -4540,8 +4538,6 @@ void ShowNatDeal()
 	}
 }
 
-void SetBrightSpot( int x, int y, int Brightness, bool dir );
-
 void DrawCordonPoint( int x, int y )
 {
 	if ( WaterDeep[( x >> 5 ) + ( ( y >> 5 ) << ( TopSH + 1 ) )] > 127 )
@@ -4588,11 +4584,13 @@ void PictureCordons()
 				{
 					NatDeals[ofs] = TMP[ofs - 1];
 					change = true;
-				} else if ( TMP[ofs + NATLX] != 0xFF )
+				} 
+				else if ( TMP[ofs + NATLX] != 0xFF )
 				{
 					NatDeals[ofs] = TMP[ofs + NATLX];
 					change = true;
-				} else if ( TMP[ofs - NATLX] != 0xFF )
+				} 
+				else if ( TMP[ofs - NATLX] != 0xFF )
 				{
 					NatDeals[ofs] = TMP[ofs - NATLX];
 					change = true;
@@ -4602,7 +4600,7 @@ void PictureCordons()
 		ProcessMessages();
 	} while ( change );
 	free( TMP );
-	//
+	//extending on land
 	int ofs = 0;
 	int MaxX = NATLX - 2;
 	int Stolb = 47;
@@ -4612,11 +4610,11 @@ void PictureCordons()
 		{
 			if ( x > 0 && x < MaxX&&y>0 && y < MaxX )
 			{
-				int x0 = ( x << 7 ) + 64;
-				int y0 = ( y << 7 ) + 64;
 				byte c = NatDeals[ofs];
 				if ( c != 0xFF )
 				{
+					int x0 = (x << 7) + 64;
+					int y0 = (y << 7) + 64;
 					c >>= 4;
 					int cr = NatDeals[ofs + 1];
 					if ( cr != 0xFF )
