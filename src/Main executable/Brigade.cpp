@@ -6050,21 +6050,25 @@ void SearchArmyLink(OneObject* OBJ)
 		{
 			top1 = MotionLinks[top0 + top1 * NAreas];
 			Area* AR = TopMap + top1;
-			int x1 = int(AR->x) << 6;
-			int y1 = int(AR->y) << 6;
-			int x0 = OBJ->RealX >> 4;
-			int y0 = OBJ->RealY >> 4;
+			
+			OBJ->DestX = 0;
+			OBJ->DestY = 0;
 			OBJ->NewState = 0;
 			OBJ->GroundState = 0;
-			if (Norma(x0 - x1, y0 - y1) > 250)
+			// Todo: sometimes when loading a save, AR becomes corrupeted
+			// see issue https://github.com/ereb-thanatos/cossacks-revamp-2017/issues/3
+			if (AR)
 			{
-				OBJ->CreatePath(x1 >> 4, y1 >> 4);
+				int x1 = int(AR->x) << 6;
+				int y1 = int(AR->y) << 6;
+				int x0 = OBJ->RealX >> 4;
+				int y0 = OBJ->RealY >> 4;
+				if (Norma(x0 - x1, y0 - y1) > 250)
+				{
+					OBJ->CreatePath(x1 >> 4, y1 >> 4);
+				}
 			}
-			else
-			{
-				OBJ->DestX = 0;
-				OBJ->DestY = 0;
-			};
+			
 		}
 		else
 		{
