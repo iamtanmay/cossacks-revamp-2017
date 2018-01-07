@@ -322,7 +322,6 @@ int SetReceiveBufferSize(SOCKET sock, int size);
 #endif
 	time_t time(time_t *timer);
 #else
-#include <time.h>
 #endif
 
 

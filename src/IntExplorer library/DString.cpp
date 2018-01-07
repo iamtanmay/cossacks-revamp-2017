@@ -1,8 +1,4 @@
 #include "../Main executable/common.h"
-#include "IntExplorer.h"
-#include "ParseRQ.h"
-#include <crtdbg.h>
-#include <assert.h>
 
 class DString
 {
@@ -76,7 +72,7 @@ DString& DString::operator +=(DString& ds)
 char DString::operator [](int index)
 {
 	if (str && index > L)return str[index];
-	else return 0;
+	return 0;
 };
 
 bool DString::operator ==(char* s)
@@ -85,7 +81,7 @@ bool DString::operator ==(char* s)
 	{
 		return !strcmp(s, str);
 	}
-	else return false;
+	return false;
 };
 
 bool DString::operator ==(DString& ds)
@@ -94,7 +90,7 @@ bool DString::operator ==(DString& ds)
 	{
 		return !strcmp(ds.str, str);
 	}
-	else return false;
+	return false;
 };
 //---------------
 DString::DString()

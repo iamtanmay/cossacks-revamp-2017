@@ -3396,7 +3396,7 @@ void ciRplGetChanKeyHandler(CHAT chat, ciServerMessage* message)
 			keys = NULL;
 			values = NULL;
 			num = 0;
-			while (1)
+			while (true)
 			{
 				key = ciParseValue(flags, &len);
 				if (!key)

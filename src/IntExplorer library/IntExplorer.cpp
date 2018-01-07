@@ -14,7 +14,7 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 	FILE* F = fopen("dolog.dat", "r");
 	if (F)
 	{
-		LOGMODE = 1;
+		LOGMODE = true;
 		fclose(F);
 	};
 	switch (ul_reason_for_call)

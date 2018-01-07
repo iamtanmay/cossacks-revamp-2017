@@ -16,7 +16,6 @@
 #define assert(a)
 #endif
 #include <stdlib.h>
-#include <string.h>
 #include "darray.h"
 #include "hashtable.h"
 
@@ -123,8 +122,7 @@ int TableRemove(HashTable table, const void* delElem)
 	itempos = ArraySearch(table->buckets[hash], delElem, table->compfn, 0, 0);
 	if (itempos == NOT_FOUND)
 		return 0;
-	else
-		ArrayDeleteAt(table->buckets[hash], itempos);
+	ArrayDeleteAt(table->buckets[hash], itempos);
 	return 1;
 }
 
@@ -137,8 +135,7 @@ void* TableLookup(HashTable table, const void* elemKey)
 	                      0);
 	if (itempos == NOT_FOUND)
 		return NULL;
-	else
-		return ArrayNth(table->buckets[hash], itempos);
+	return ArrayNth(table->buckets[hash], itempos);
 }
 
 

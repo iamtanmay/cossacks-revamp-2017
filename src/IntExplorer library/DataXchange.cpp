@@ -2,14 +2,12 @@
 #include "IntExplorer.h"
 #include "ParseRQ.h"
 #include <crtdbg.h>
-#include <assert.h>
 #include "GameOnMap.h"
-#include <sys\utime.h>
-#include <process.h>
+#include <sys/utime.h>
 #include <stdarg.h>
 __declspec( dllimport ) void SetCurPtr(int v);
 extern __declspec( dllimport ) bool GameInProgress;
-bool LOGMODE = 0;
+bool LOGMODE = false;
 
 void ReportIt(char* s, ...)
 {
@@ -138,7 +136,7 @@ DWORD SXP_DevScope::SendRequest(sicExplorer* SXP, ParsedRQ* P1, bool AllowNewWin
 				NReq++;
 				return CurReq - 1;
 			}
-			else free(data);
+			free(data);
 		};
 	return 0;
 };
@@ -160,7 +158,7 @@ DWORD SXP_DevScope::GetRequestResult(DWORD Handle, ParsedRQ* Result)
 					Result->Extract(res, sz);
 					return 128;
 				}
-				else return R;
+				return R;
 			};
 		};
 	return 1;
@@ -239,7 +237,7 @@ void InitDevs()
 
 DWORD SendGlobalRequest(sicExplorer* SXP, char* data, bool allow)
 {
-	return DEVSCOPE.SendRequest(SXP, data, allow, 1);
+	return DEVSCOPE.SendRequest(SXP, data, allow, true);
 }
 
 
@@ -379,9 +377,9 @@ void exec_LW_lockall(int Np, char** par, int* size)
 					DialogsSystem* DSS = &OSW->Boxes[j].DSS;
 					if (DSS)
 					{
-						for (int q = 0; q < MAXDLG; q++)
+						for (auto & q : DSS->DSS)
 						{
-							if (DSS->DSS[q])DSS->DSS[q]->OnUserClick = nullptr;
+							if (q)q->OnUserClick = nullptr;
 						};
 					};
 				};
@@ -414,9 +412,9 @@ void exec_LW_lockbox(int Np, char** par, int* size)
 							DialogsSystem* DSS = &OSW->Boxes[j].DSS;
 							if (DSS)
 							{
-								for (int q = 0; q < MAXDLG; q++)
+								for (auto & q : DSS->DSS)
 								{
-									if (DSS->DSS[q])DSS->DSS[q]->OnUserClick = nullptr;
+									if (q)q->OnUserClick = nullptr;
 								};
 							};
 						};
@@ -489,12 +487,12 @@ void exec_LW_visbox(int Np, char** par, int* size)
 							DialogsSystem* DSS = &OSW->Boxes[j].DSS;
 							if (DSS)
 							{
-								for (int q = 0; q < MAXDLG; q++)
+								for (auto & q : DSS->DSS)
 								{
-									if (DSS->DSS[q])
+									if (q)
 									{
-										DSS->DSS[q]->Visible = vis;
-										DSS->DSS[q]->Enabled = vis;
+										q->Visible = vis;
+										q->Enabled = vis;
 									};
 								};
 							};
@@ -573,11 +571,11 @@ void exec_LW_enbbox(int Np, char** par, int* size)
 							DialogsSystem* DSS = &OSW->Boxes[j].DSS;
 							if (DSS)
 							{
-								for (int q = 0; q < MAXDLG; q++)
+								for (auto & q : DSS->DSS)
 								{
-									if (DSS->DSS[q])
+									if (q)
 									{
-										DSS->DSS[q]->Enabled = vis;
+										q->Enabled = vis;
 									};
 								};
 							};
@@ -739,8 +737,8 @@ void exec_LW_show(int Np, char** par)
 					strcpy(OSW->Result + sz, par[0]);
 					strcpy(OSW->WinID, win);
 					OSW->EXP = SXP_local;
-					OSW->Ready = 0;
-					OSW->Parsed = 0;
+					OSW->Ready = false;
+					OSW->Parsed = false;
 
 					for (int V = 0; V < NTIME; V++)
 					{
@@ -764,7 +762,7 @@ void exec_LW_show(int Np, char** par)
 	}
 }
 
-bool InReparse = 0;
+bool InReparse = false;
 
 void exec_LW_file(int Np, char** par)
 {
@@ -841,9 +839,9 @@ void exec_LW_file(int Np, char** par)
 							};
 						}
 						while (LNS != L00 && NEWST[0] == '<');
-						InReparse = 1;
+						InReparse = true;
 						OSW->ReParse();
-						InReparse = 0;
+						InReparse = false;
 						if (OSW->Result)SaveCurrentResultTo(OSW, "Internet/cash/tmpcml_0000.cml");
 					}
 					else
@@ -863,8 +861,8 @@ void exec_LW_file(int Np, char** par)
 						OSW->Result[sz + siz] = 0;
 						strcpy(OSW->WinID, win);
 						OSW->EXP = SXP_local;
-						OSW->Ready = 0;
-						OSW->Parsed = 0;
+						OSW->Ready = false;
+						OSW->Parsed = false;
 						for (int V = 0; V < NTIME; V++)
 						{
 							OSW->TimeLimit[V] = 0;
@@ -920,8 +918,8 @@ void exec_LW_pfile(int Np, char** par)
 					OSW->Result[sz] = 0;
 					strcpy(OSW->WinID, win);
 					OSW->EXP = SXP_local;
-					OSW->Ready = 0;
-					OSW->Parsed = 0;
+					OSW->Ready = false;
+					OSW->Parsed = false;
 					for (int V = 0; V < NTIME; V++)
 					{
 						OSW->TimeLimit[V] = 0;
@@ -1087,7 +1085,7 @@ void exec_LW_mpclear(int Np, char** par, int* size)
 	BIGMAP.ClearMapPictures();
 }
 
-bool NOXCFILE = 0;
+bool NOXCFILE = false;
 
 void exec_LW_xcfile(int Np, char** par, int* size)
 {
@@ -1119,12 +1117,12 @@ void exec_LW_xcfile(int Np, char** par, int* size)
 					char tmp[512];
 					sprintf(tmp, "Internet/Cash/%s", par[0]);
 					_utime(tmp, &UTB);
-					NOXCFILE = 1;
+					NOXCFILE = true;
 					if (OSW->Result)
 					{
 						OSW->ReParse();
 					}
-					NOXCFILE = 0;
+					NOXCFILE = false;
 				}
 			}
 		}
@@ -1458,11 +1456,11 @@ void FilterRQ2Send(sicExplorer* SXP, ParsedRQ* RQ, bool AllowNew)
 
 		if (cid[0] == 'L' && cid[1] == 'W' && cid[2] == '_')
 		{
-			bool del = 1;
+			bool del = true;
 			if (!strcmp(cid, "LW_new"))
 			{
 				//open in new window
-				del = 1;
+				del = true;
 				if (AllowNew)
 				{
 					char cc[16];
@@ -1723,7 +1721,7 @@ void StartDownloadInternetFile(char* Name, char* Server, char* DestName)
 	P1.AddIntParam(8192);
 	DNPR[N_DNPR].LastReqTime = GetTickCount();
 	P1.UnParse(CC, 1024);
-	SendGlobalRequest(SXP + 7, CC, 0);
+	SendGlobalRequest(SXP + 7, CC, false);
 };
 //int LastDNSize=0;
 __declspec( dllexport )
@@ -1744,7 +1742,7 @@ void ProcessDownloadInternetFiles()
 			P1.AddIntParam(8192 + 8192);
 			DNPR[i].LastReqTime = TIME;
 			P1.UnParse(CC, 1024);
-			SendGlobalRequest(SXP + 7, CC, 0);
+			SendGlobalRequest(SXP + 7, CC, false);
 		}
 	}
 }
@@ -1772,7 +1770,7 @@ __declspec( dllexport ) void SendRecBuffer(byte* Data, int size, bool Final)
 		free(DATA);
 		char* DB = (char*)malloc(szz + 16);
 		P1.UnParse(DB, szz + 16);
-		SendGlobalRequest(SXP + 7, DB, 0);
+		SendGlobalRequest(SXP + 7, DB, false);
 		if (Final)
 		{
 			CurrUplID[0] = 0;
@@ -1809,8 +1807,8 @@ void exec_LW_dfp(int Np, char** par, int* size)
 				{
 					DNPR[i].DownloadedSize = CSize + sz;
 					DNPR[i].LastReqTime = GetTickCount();
-					if (sz != 8192)DNPR[i].NotFinished = 1;
-					DNPR[i].NeedToSendRequest = 1;
+					if (sz != 8192)DNPR[i].NotFinished = true;
+					DNPR[i].NeedToSendRequest = true;
 				};
 			fclose(f);
 		};

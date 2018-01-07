@@ -19,7 +19,6 @@ devsupport@gamespy.com
 ** INCLUDES **
 *************/
 #if !defined(UNDER_CE) && !defined(__KATANA__)
-#include <assert.h>
 #else
 #define assert(a)
 #endif
@@ -33,7 +32,6 @@ devsupport@gamespy.com
 #else
 #include "../hashtable.h"
 #include "../darray.h"
-#include "../nonport.h"
 #endif
 
 /************

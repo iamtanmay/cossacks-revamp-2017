@@ -23,7 +23,6 @@ devsupport@gamespy.com
 #if defined(applec) || defined(THINK_C) || defined(__MWERKS__) && !defined(__KATANA__) && !defined(__mips64)
 	#include "::nonport.h"
 #else
-#include "../nonport.h"
 #endif
 
 /**********

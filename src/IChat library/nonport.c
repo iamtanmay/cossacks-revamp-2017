@@ -327,8 +327,7 @@ int SetSockBlocking(SOCKET sock, int isblocking)
 #endif
 	if (rcode == 0)
 		return 1;
-	else
-		return 0;
+	return 0;
 }
 
 int DisableNagle(SOCKET sock)

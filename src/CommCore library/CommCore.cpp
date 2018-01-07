@@ -53,20 +53,17 @@ BOOL CCommCore::SendUserName()
 		//		return SendServerList();
 		return SendNewName(m_piNumber);
 	}
-	else
-	{
-		CC_PK_SEND_USER_NAME SendUserNamePacket;
+	CC_PK_SEND_USER_NAME SendUserNamePacket;
 
-		strcpy(SendUserNamePacket.m_szUserName, m_szUserName);
+	strcpy(SendUserNamePacket.m_szUserName, m_szUserName);
 
-		return SendRawPacket(m_paServAddr,
-		                     m_paServPort,
-		                     CC_PT_SEND_USER_NAME,
-		                     (LPBYTE)&SendUserNamePacket,
-		                     sizeof( CC_PK_SEND_USER_NAME),
-		                     TRUE,
-		                     FALSE);
-	};
+	return SendRawPacket(m_paServAddr,
+	                     m_paServPort,
+	                     CC_PT_SEND_USER_NAME,
+	                     (LPBYTE)&SendUserNamePacket,
+	                     sizeof( CC_PK_SEND_USER_NAME),
+	                     TRUE,
+	                     FALSE);;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -153,28 +150,25 @@ BOOL CCommCore::SendUserData()
 		//		return SendServerList();
 		return SendNewData(m_piNumber);
 	}
-	else
-	{
-		LPCC_PK_SEND_USER_DATA lpSendUserDataPacket;
+	LPCC_PK_SEND_USER_DATA lpSendUserDataPacket;
 
-		lpSendUserDataPacket = (LPCC_PK_SEND_USER_DATA)malloc(sizeof( CC_PK_SEND_USER_DATA) + m_uUserDataSize);
-		assert( lpSendUserDataPacket );
+	lpSendUserDataPacket = (LPCC_PK_SEND_USER_DATA)malloc(sizeof( CC_PK_SEND_USER_DATA) + m_uUserDataSize);
+	assert( lpSendUserDataPacket );
 
-		lpSendUserDataPacket->m_uUserDataSize = m_uUserDataSize;
+	lpSendUserDataPacket->m_uUserDataSize = m_uUserDataSize;
 
-		memcpy(lpSendUserDataPacket->m_UserData, m_lpbUserData, m_uUserDataSize);
+	memcpy(lpSendUserDataPacket->m_UserData, m_lpbUserData, m_uUserDataSize);
 
-		BOOL bRes = SendRawPacket(m_paServAddr,
-		                          m_paServPort,
-		                          CC_PT_SEND_USER_DATA,
-		                          (LPBYTE)lpSendUserDataPacket,
-		                          sizeof( CC_PK_SEND_USER_DATA) + m_uUserDataSize,
-		                          TRUE,
-		                          FALSE);
-		free(lpSendUserDataPacket);
+	BOOL bRes = SendRawPacket(m_paServAddr,
+	                          m_paServPort,
+	                          CC_PT_SEND_USER_DATA,
+	                          (LPBYTE)lpSendUserDataPacket,
+	                          sizeof( CC_PK_SEND_USER_DATA) + m_uUserDataSize,
+	                          TRUE,
+	                          FALSE);
+	free(lpSendUserDataPacket);
 
-		return bRes;
-	};
+	return bRes;;
 }
 
 // ---------------------------------------------------------------------------------------------

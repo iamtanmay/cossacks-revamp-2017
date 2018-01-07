@@ -1,6 +1,6 @@
 #include "../Main executable/common.h"
 #pragma pack(4)
-#include "Chat\chat.h"
+#include "Chat/chat.h"
 #pragma pack(1)
 #include "cs_chat.h"
 
@@ -86,7 +86,7 @@ void Raw(CHAT chat, const char* raw, void* param)
 void Disconnected(CHAT chat, const char* reason, void* param)
 {
 	ChatSystem* CC = (ChatSystem*)param;
-	if (CC)CC->Connected = 0;
+	if (CC)CC->Connected = false;
 }
 
 void ChangedNickCallback(CHAT chat, CHATBool success, const char* oldNick, const char* newNick, void* param)
@@ -111,12 +111,12 @@ void PrivateMessage(CHAT chat, const char* user, const char* message, int type, 
 		}
 		else if (!strstr(message, "@@@"))
 		{
-			bool mute = 0;
+			bool mute = false;
 			int c = CSYS.CurChannel;
 			for (int i = 0; i < CSYS.CCH[c].NPlayers; i++)
-				if ((!strcmp(CSYS.CCH[c].Players[i].Nick, user)) && CSYS.CCH[c].Players[i].Muted)mute = 1;
+				if ((!strcmp(CSYS.CCH[c].Players[i].Nick, user)) && CSYS.CCH[c].Players[i].Muted)mute = true;
 			for (int i = 0; i < CSYS.NAbsPlayers; i++)
-				if ((!strcmp(CSYS.AbsPlayers[i].Nick, user)) && CSYS.AbsPlayers[i].Muted)mute = 1;
+				if ((!strcmp(CSYS.AbsPlayers[i].Nick, user)) && CSYS.AbsPlayers[i].Muted)mute = true;
 			if (!mute)
 			{
 				CC->Private.Add((char*)user, (char*)message);
@@ -152,11 +152,11 @@ void ChannelMessage(CHAT chat, const char* channel, const char* user, const char
 				}
 				else if (!strstr(message, "@@@"))
 				{
-					bool mute = 0;
+					bool mute = false;
 					for (int i = 0; i < CSYS.CCH[q].NPlayers; i++)
-						if ((!strcmp(CSYS.CCH[q].Players[i].Nick, user)) && CSYS.CCH[q].Players[i].Muted)mute = 1;
+						if ((!strcmp(CSYS.CCH[q].Players[i].Nick, user)) && CSYS.CCH[q].Players[i].Muted)mute = true;
 					for (int i = 0; i < CSYS.NAbsPlayers; i++)
-						if ((!strcmp(CSYS.AbsPlayers[i].Nick, user)) && CSYS.AbsPlayers[i].Muted)mute = 1;
+						if ((!strcmp(CSYS.AbsPlayers[i].Nick, user)) && CSYS.AbsPlayers[i].Muted)mute = true;
 					if (!mute)CC->Common[q].Add((char*)user, (char*)message);
 				};
 			};
@@ -228,8 +228,8 @@ void ConnectCallback(CHAT chat, CHATBool success, void* param)
 {
 	ChatSystem* CC = (ChatSystem*)param;
 	if (CC)CC->LastAccessTime = current_time();
-	if (success)CC->Connected = 1;
-	else CC->Error = 1;
+	if (success)CC->Connected = true;
+	else CC->Error = true;
 }
 
 void NickErrorCallback(CHAT chat, int type, const char* nick, void* param)
@@ -283,14 +283,14 @@ void NickErrorCallback(CHAT chat, int type, const char* nick, void* param)
 			else
 			{
 				if (chat)chatDisconnect(chat);
-				CC->Connected = 0;
+				CC->Connected = false;
 				chat = 0;
 			};
 		}
 		else if (type == CHAT_INVALID)
 		{
 			if (chat)chatDisconnect(chat);
-			CC->Connected = 0;
+			CC->Connected = false;
 		}
 	};
 };
@@ -303,7 +303,7 @@ void EnterChannelCallback(CHAT chat, CHATBool success, CHATEnterResult result, c
 	ChatSystem* CC = (ChatSystem*)param;
 	if (CC)
 	{
-		if (!success)CC->Error = 1;
+		if (!success)CC->Error = true;
 		CC->LastAccessTime = current_time();
 		for (int i = 0; i < NCHNL; i++)
 			if (!strcmp(CC->chatChannel[i], channel))
@@ -327,13 +327,13 @@ void GetUserInfoCallback(CHAT chat, CHATBool success, const char* nick, const ch
 		}
 		else
 		{
-			for (int q = 0; q < NCHNL; q++)
+			for (auto & q : CC->CCH)
 			{
-				for (int i = 0; i < CC->CCH[q].NPlayers; i++)
-					if (!strcmp(CC->CCH[q].Players[i].Nick, nick))
+				for (int i = 0; i < q.NPlayers; i++)
+					if (!strcmp(q.Players[i].Nick, nick))
 					{
-						strcpy(CC->CCH[q].Players[i].Info, user);
-						strcpy(CC->CCH[q].Players[i].mail, name);
+						strcpy(q.Players[i].Info, user);
+						strcpy(q.Players[i].mail, name);
 					};
 			};
 			for (int i = 0; i < CC->NAbsPlayers; i++)
@@ -389,9 +389,9 @@ void ChatSystem::CheckMessage(char* message)
 				cc = NULL;
 			};
 			PRESENT = 0;
-			for (int q = 0; q < NCHNL; q++)
-				for (i = 0; i < CCH[q].NPlayers; i++)
-					if (!strcmp(CCH[q].Players[i].Nick, cc3))PRESENT = 1;
+			for (auto & q : CCH)
+				for (i = 0; i < q.NPlayers; i++)
+					if (!strcmp(q.Players[i].Nick, cc3))PRESENT = 1;
 			if (!PRESENT)AddAbsentPlayer(cc3);
 		}
 		while (cc);
@@ -439,7 +439,7 @@ void ChatSystem::Setup()
 void ChatSystem::Process()
 {
 	if (chat)chatThink(chat);
-	for (int q = 0; q < NCHNL; q++)SortPlayers(CCH[q].Players, CCH[q].NPlayers);
+	for (auto & q : CCH)SortPlayers(q.Players, q.NPlayers);
 	SortPlayers(AbsPlayers, NAbsPlayers);
 	int NPL = CCH[NCHNL - 1].NPlayers;
 	int NS = 0;
@@ -448,7 +448,7 @@ void ChatSystem::Process()
 		if (rand() < 2000 && !CCH[NCHNL - 1].Players[i].InfoReqSent)
 		{
 			chatGetUserInfo(chat, CCH[NCHNL - 1].Players[i].Nick, &GetUserInfoCallback, this, CHATFalse);
-			CCH[NCHNL - 1].Players[i].InfoReqSent = 1;
+			CCH[NCHNL - 1].Players[i].InfoReqSent = true;
 			NS++;
 		};
 	};
@@ -464,9 +464,9 @@ bool ChatSystem::ConnectToChat(char* Nick, char* Info, char* Mail, char* Chat)
 	strcpy(chatNick, Nick);
 	strcpy(chatUser, Info);
 	strcpy(chatName, Mail);
-	Error = 0;
+	Error = false;
 	Disconnect();
-	Connected = 0;
+	Connected = false;
 	Setup();
 	strcpy(serverAddress, Chat);
 	chat = chatConnect(serverAddress, port, chatNick, chatUser, chatName, &globalCallbacks, NickErrorCallback,
@@ -480,14 +480,14 @@ bool ChatSystem::ConnectToChat(char* Nick, char* Info, char* Mail, char* Chat)
 	while (!(Connected || Error || current_time() - t0 > 40000));
 	if (Error || current_time() - t0 > 40000)
 	{
-		Connected = 0;
-		Error = 1;
+		Connected = false;
+		Error = true;
 		if (chat)chatDisconnect(chat);
 	}
 	else
 	{
-		for (int q = 0; q < NCHNL; q++)
-			chatEnterChannel(chat, chatChannel[q], NULL, &channelCallbacks, EnterChannelCallback, this, CHATFalse);
+		for (auto & q : chatChannel)
+			chatEnterChannel(chat, q, NULL, &channelCallbacks, EnterChannelCallback, this, CHATFalse);
 		t0 = current_time();
 		do
 		{
@@ -497,8 +497,8 @@ bool ChatSystem::ConnectToChat(char* Nick, char* Info, char* Mail, char* Chat)
 		while (!((enterChannelSuccess[0] && enterChannelSuccess[1]) || Error || current_time() - t0 > 20000));
 		if (Error || current_time() - t0 > 20000)
 		{
-			Connected = 0;
-			Error = 1;
+			Connected = false;
+			Error = true;
 			if (chat)chatDisconnect(chat);
 		};
 	};
@@ -512,9 +512,9 @@ ChatSystem::ChatSystem()
 
 ChatSystem::~ChatSystem()
 {
-	for (int q = 0; q < NCHNL; q++)
+	for (auto & q : CCH)
 	{
-		if (CCH[q].Players)free(CCH[q].Players);
+		if (q.Players)free(q.Players);
 	};
 	if (AbsPlayers)free(AbsPlayers);
 	memset(this, 0, sizeof* this);
@@ -569,15 +569,15 @@ bool ChatMsg::RemoveOne(char* nick, char* buf, int Len)
 		NMsg--;
 		return true;
 	}
-	else return false;
+	return false;
 };
 
 void ChatSystem::SortPlayers(OneChatPlayer* PL, int N)
 {
-	bool change = 0;
+	bool change = false;
 	do
 	{
-		change = 0;
+		change = false;
 		for (int i = 1; i < N; i++)
 		{
 			int r = stricmp(PL[i].Nick, PL[i - 1].Nick);
@@ -587,7 +587,7 @@ void ChatSystem::SortPlayers(OneChatPlayer* PL, int N)
 				memcpy(&PLX, PL + i, sizeof OneChatPlayer);
 				memcpy(PL + i, PL + i - 1, sizeof OneChatPlayer);
 				memcpy(PL + i - 1, &PLX, sizeof OneChatPlayer);
-				change = 1;
+				change = true;
 			};
 		};
 	}

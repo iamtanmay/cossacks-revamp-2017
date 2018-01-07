@@ -2,7 +2,6 @@
 #include "IntExplorer.h"
 #include "ParseRQ.h"
 #include <crtdbg.h>
-#include <assert.h>
 
 extern int IBOR2;
 extern int IBOR0;
@@ -95,7 +94,7 @@ void OneSicWindow::Process()
 				P1.AddParam(CC, strlen(CC) + 1);
 				char dat[512];
 				P1.UnParse(dat, 511);
-				SendGlobalRequest(EXP, dat, 1);
+				SendGlobalRequest(EXP, dat, true);
 			};
 		};
 	};
@@ -121,7 +120,7 @@ void OneSicWindow::Process()
 			{
 				if (r != 0)
 				{
-					Error = 1;
+					Error = true;
 				};
 			};
 		};
@@ -129,7 +128,7 @@ void OneSicWindow::Process()
 		{
 			if (!UPHANDLE)
 			{
-				if (RefsSent || (!strchr(Result, '~')))Ready = 1;
+				if (RefsSent || (!strchr(Result, '~')))Ready = true;
 				else
 				{
 					DownloadRefs();
@@ -166,7 +165,7 @@ void OneSicWindow::Process()
 				};
 			};
 		};
-		Parsed = 1;
+		Parsed = true;
 	};
 };
 
@@ -225,7 +224,7 @@ void OneSicWindow::DownloadRefs()
 			memcpy(temp, Result + i, j + 2);
 			temp[j + 2] = 0;
 			i += j + 1;
-			bool FoundInCash = 0;
+			bool FoundInCash = false;
 			sprintf(temp1, "Internet\\cash\\%s.txt", temp);
 			ResFile F = RReset(temp1);
 			if (F != INVALID_HANDLE_VALUE)
@@ -239,7 +238,7 @@ void OneSicWindow::DownloadRefs()
 				L = strlen(Result);
 				free(s2);
 				RClose(F);
-				FoundInCash = 1;
+				FoundInCash = true;
 			}
 			else
 			{
@@ -254,7 +253,7 @@ void OneSicWindow::DownloadRefs()
 					i += strlen(temp1) - 1;
 					L = strlen(Result);
 					RClose(F_local);
-					FoundInCash = 1;
+					FoundInCash = true;
 				};
 			};
 			if (!FoundInCash)
@@ -270,8 +269,8 @@ void OneSicWindow::DownloadRefs()
 	};
 	if (N)
 	{
-		UPHANDLE = SendGlobalRequest(EXP, req, 0);
-		RefsSent = 1;
+		UPHANDLE = SendGlobalRequest(EXP, req, false);
+		RefsSent = true;
 	};
 };
 
@@ -280,7 +279,7 @@ int ReadNumber(char* s, int* L, int vmax)
 	int v = 0;
 	char c;
 	int p = 0;
-	bool doit = 1;
+	bool doit = true;
 	int sign = 0;
 	do
 	{
@@ -293,7 +292,7 @@ int ReadNumber(char* s, int* L, int vmax)
 		else if (c == '%')
 		{
 			v = (v * vmax) / 100;
-			doit = 0;
+			doit = false;
 			p++;
 		}
 		else if (c == '-' && !p)
@@ -301,12 +300,12 @@ int ReadNumber(char* s, int* L, int vmax)
 			p++;
 			sign = 1;
 		}
-		else doit = 0;
+		else doit = false;
 	}
 	while (doit);
 	*L = p;
 	if (sign)return -v;
-	else return v;
+	return v;
 };
 
 int CReadX(char** sx, int x0, int x1)
@@ -393,14 +392,14 @@ void ReadCoordinates(char** src, int& x, int& y, int& xR, int& yR, OneBox* BOX)
 	int yc = 0;
 	int w = 0;
 	int h = 0;
-	bool vx0 = 0;
-	bool vy0 = 0;
-	bool vx1 = 0;
-	bool vy1 = 0;
-	bool vxc = 0;
-	bool vyc = 0;
-	bool vw = 0;
-	bool vh = 0;
+	bool vx0 = false;
+	bool vy0 = false;
+	bool vx1 = false;
+	bool vy1 = false;
+	bool vxc = false;
+	bool vyc = false;
+	bool vw = false;
+	bool vh = false;
 	do
 	{
 		c = (*src)[0];
@@ -408,49 +407,49 @@ void ReadCoordinates(char** src, int& x, int& y, int& xR, int& yR, OneBox* BOX)
 		{
 			(*src) += 2;
 			x0 = CReadX(src, x, xR);
-			vx0 = 1;
+			vx0 = true;
 		}
 		else if (c == 'x' && (*src)[1] == '1' && (*src)[2] == ':')
 		{
 			(*src) += 3;
 			x1 = CReadX(src, x, xR);
-			vx1 = 1;
+			vx1 = true;
 		}
 		else if (c == 'x' && (*src)[1] == 'c' && (*src)[2] == ':')
 		{
 			(*src) += 3;
 			xc = CReadX(src, x, xR);
-			vxc = 1;
+			vxc = true;
 		}
 		else if (c == 'y' && (*src)[1] == ':')
 		{
 			(*src) += 2;
 			y0 = CReadY(src, y, yR, BOX);
-			vy0 = 1;
+			vy0 = true;
 		}
 		else if (c == 'y' && (*src)[1] == '1' && (*src)[2] == ':')
 		{
 			(*src) += 3;
 			y1 = CReadY(src, y, yR, BOX);
-			vy1 = 1;
+			vy1 = true;
 		}
 		else if (c == 'y' && (*src)[1] == 'c' && (*src)[2] == ':')
 		{
 			(*src) += 3;
 			yc = CReadY(src, y, yR, BOX);
-			vyc = 1;
+			vyc = true;
 		}
 		else if (c == 'w' && (*src)[1] == ':')
 		{
 			(*src) += 2;
 			w = CReadX(src, 0, xR - x);
-			vw = 1;
+			vw = true;
 		}
 		else if (c == 'h' && (*src)[1] == ':')
 		{
 			(*src) += 2;
 			h = CReadY(src, 0, yR - y, BOX);
-			vh = 1;
+			vh = true;
 		}
 		else (*src)++;
 	}
@@ -519,37 +518,28 @@ RLCFont* sicExplorer::GetFontByName(char* fnt)
 	}
 
 	if (!strcmp(fnt, "F10"))return &fn10;
-	else if (!strcmp(fnt, "F8"))return &fn8;
-
-	else if (!strcmp(fnt, "WF"))return &WhiteFont;
-	else if (!strcmp(fnt, "YF"))return &YellowFont;
-	else if (!strcmp(fnt, "RF"))return &RedFont;
-	else if (!strcmp(fnt, "BF"))return &BlackFont;
-
-	else if (!strcmp(fnt, "SWF"))return &SmallWhiteFont;
-	else if (!strcmp(fnt, "SYF"))return &SmallYellowFont;
-	else if (!strcmp(fnt, "SRF"))return &SmallRedFont;
-	else if (!strcmp(fnt, "SBF"))return &SmallBlackFont;
-
-	else if (!strcmp(fnt, "BWF"))return &BigWhiteFont;
-	else if (!strcmp(fnt, "BYF"))return &BigYellowFont;
-	else if (!strcmp(fnt, "BRF"))return &BigRedFont;
-	else if (!strcmp(fnt, "BBF"))return &BigBlackFont;
-
-	else if (!strcmp(fnt, "SPWF"))return &BigWhiteFont;
-	else if (!strcmp(fnt, "SPYF"))return &BigYellowFont;
-	else if (!strcmp(fnt, "SPRF"))return &BigRedFont;
-	else if (!strcmp(fnt, "SPBF"))return &BigBlackFont;
-
-	else if (!strcmp(fnt, "XXWF"))return &SpecialWhiteFont;
-	else if (!strcmp(fnt, "XXYF"))return &SpecialYellowFont;
-	else if (!strcmp(fnt, "XXRF"))return &SpecialRedFont;
-	else if (!strcmp(fnt, "XXBF"))return &SpecialBlackFont;
-
-	else
-	{
-		return &YellowFont;
-	}
+	if (!strcmp(fnt, "F8"))return &fn8;
+	if (!strcmp(fnt, "WF"))return &WhiteFont;
+	if (!strcmp(fnt, "YF"))return &YellowFont;
+	if (!strcmp(fnt, "RF"))return &RedFont;
+	if (!strcmp(fnt, "BF"))return &BlackFont;
+	if (!strcmp(fnt, "SWF"))return &SmallWhiteFont;
+	if (!strcmp(fnt, "SYF"))return &SmallYellowFont;
+	if (!strcmp(fnt, "SRF"))return &SmallRedFont;
+	if (!strcmp(fnt, "SBF"))return &SmallBlackFont;
+	if (!strcmp(fnt, "BWF"))return &BigWhiteFont;
+	if (!strcmp(fnt, "BYF"))return &BigYellowFont;
+	if (!strcmp(fnt, "BRF"))return &BigRedFont;
+	if (!strcmp(fnt, "BBF"))return &BigBlackFont;
+	if (!strcmp(fnt, "SPWF"))return &BigWhiteFont;
+	if (!strcmp(fnt, "SPYF"))return &BigYellowFont;
+	if (!strcmp(fnt, "SPRF"))return &BigRedFont;
+	if (!strcmp(fnt, "SPBF"))return &BigBlackFont;
+	if (!strcmp(fnt, "XXWF"))return &SpecialWhiteFont;
+	if (!strcmp(fnt, "XXYF"))return &SpecialYellowFont;
+	if (!strcmp(fnt, "XXRF"))return &SpecialRedFont;
+	if (!strcmp(fnt, "XXBF"))return &SpecialBlackFont;
+	return &YellowFont;
 }
 
 int GETHX(char c)
@@ -666,7 +656,7 @@ int OneSicWindow::ParseTheWholeText()
 						else
 						{
 							OBX->StartScrollIndex = 0;
-							OBX->Scroll = 0;
+							OBX->Scroll = false;
 						};
 						OBX->DSS.addClipper(OBX->xi, OBX->yi, OBX->xi1, OBX->yi1);
 						OBX->StartScrollIndex++;
@@ -1233,11 +1223,11 @@ int OneSicWindow::ParseTheWholeText()
 						if (IFNS[i].ReqParam)
 						{
 							IFS.ClearParams();
-							bool doit = 1;
+							bool doit = true;
 							do
 							{
 								if (Result[pos] == ',')pos++;
-								if (Result[pos] == ')')doit = 0;
+								if (Result[pos] == ')')doit = false;
 								c = Result[pos];
 								int p1;
 								int p2;
@@ -1575,7 +1565,7 @@ void sicExplorer::ChangeOutput(int x, int y, int x1, int y1)
 		}
 		else
 		{
-			OW->Parsed = 0;
+			OW->Parsed = false;
 		}
 	}
 }
@@ -1631,7 +1621,7 @@ void sicExplorer::Refresh()
 			Windows[CurWPosition]->EXP = SXP_local;
 			strcpy(Windows[CurWPosition]->WinID, WID);
 			Windows[CurWPosition]->REF = ref;
-			SendGlobalRequest(this, ref, 0);
+			SendGlobalRequest(this, ref, false);
 		}
 	}
 }
@@ -1687,7 +1677,7 @@ extern "C" __declspec( dllexport ) void RunSXP(int Index, char* home, int x, int
 	SXP[Index].ID = Index;
 	SXP[Index].RegisterOutput(x, y, x1, y1);
 
-	SendGlobalRequest(SXP + Index, home, 1);
+	SendGlobalRequest(SXP + Index, home, true);
 
 	if (SXP[Index].CurWPosition < SXP[Index].NWindows)
 	{
@@ -1703,7 +1693,7 @@ extern "C" __declspec( dllexport ) void OpenRef(int Index, char* home)
 		return;
 	}
 
-	SendGlobalRequest(SXP + Index, home, 1);
+	SendGlobalRequest(SXP + Index, home, true);
 
 	if (SXP[Index].CurWPosition < SXP[Index].NWindows)
 	{
@@ -1809,11 +1799,11 @@ extern "C" __declspec( dllexport ) void ProcessSXP(int Index, DialogsSystem* DSS
 				OBX->VS->SMaxPos = ymax - OBX->yi1 + 10;
 				if (OBX->VS->SPos > OBX->VS->SMaxPos)
 					OBX->VS->SPos = OBX->VS->SMaxPos;
-				OBX->VS->Visible = 1;
+				OBX->VS->Visible = true;
 			}
 			else
 			{
-				OBX->VS->Visible = 0;
+				OBX->VS->Visible = false;
 				OBX->VS->SPos = 0;
 			}
 			if (OBX->VS->SPos != OBX->LastScrollPos)
@@ -1843,14 +1833,14 @@ extern "C" __declspec( dllexport ) void ProcessSXP(int Index, DialogsSystem* DSS
 
 	ProcessMessages();
 
-	bool BASEACTIVE = 0;
+	bool BASEACTIVE = false;
 	if (DSS)
 	{
-		for (int i = 0; i < MAXDLG; i++)
+		for (auto & i : DSS->DSS)
 		{
-			if (DSS->DSS[i] && DSS->DSS[i]->Active)
+			if (i && i->Active)
 			{
-				BASEACTIVE = 1;
+				BASEACTIVE = true;
 			}
 		}
 	}
@@ -1865,15 +1855,15 @@ extern "C" __declspec( dllexport ) void ProcessSXP(int Index, DialogsSystem* DSS
 				DialogsSystem* DSS_Boxes = &OSW->Boxes[j].DSS;
 				if (DSS_Boxes)
 				{
-					for (int p = 0; p < MAXDLG; p++)
+					for (auto & p : DSS_Boxes->DSS)
 					{
-						if (DSS_Boxes->DSS[p])DSS_Boxes->DSS[p]->Active = 0;
+						if (p)p->Active = false;
 					}
 				}
-				OSW->Boxes[j].Active = 0;
-				OSW->Boxes[j].WasActive = 0;
+				OSW->Boxes[j].Active = false;
+				OSW->Boxes[j].WasActive = false;
 			}
-			SXPR->BaseDialogActive = 1;
+			SXPR->BaseDialogActive = true;
 		}
 		else
 		{
@@ -1884,9 +1874,9 @@ extern "C" __declspec( dllexport ) void ProcessSXP(int Index, DialogsSystem* DSS
 				DialogsSystem* DSS_Boxes = &OSW->Boxes[j].DSS;
 				if (DSS_Boxes)
 				{
-					for (int p = 0; p < MAXDLG; p++)
+					for (auto & p : DSS_Boxes->DSS)
 					{
-						if (DSS_Boxes->DSS[p] && DSS_Boxes->DSS[p]->Active)
+						if (p && p->Active)
 						{
 							if (!OSW->Boxes[j].WasActive)
 							{
@@ -1906,34 +1896,34 @@ extern "C" __declspec( dllexport ) void ProcessSXP(int Index, DialogsSystem* DSS
 						DialogsSystem* DSS_Boxes = &OSW->Boxes[j].DSS;
 						if (DSS_Boxes)
 						{
-							for (int p = 0; p < MAXDLG; p++)
+							for (auto & p : DSS_Boxes->DSS)
 							{
-								if (DSS_Boxes->DSS[p])
+								if (p)
 								{
-									DSS_Boxes->DSS[p]->Active = 0;
+									p->Active = false;
 								}
 							}
 						}
-						OSW->Boxes[j].Active = 0;
-						OSW->Boxes[j].WasActive = 0;
+						OSW->Boxes[j].Active = false;
+						OSW->Boxes[j].WasActive = false;
 					}
 					else
 					{
-						OSW->Boxes[j].WasActive = 1;
-						OSW->Boxes[j].Active = 0;
+						OSW->Boxes[j].WasActive = true;
+						OSW->Boxes[j].Active = false;
 					}
 				}
 
 				if (DSS)
 				{
-					for (int p = 0; p < MAXDLG; p++)
+					for (auto & p : DSS->DSS)
 					{
-						if (DSS->DSS[p])
+						if (p)
 						{
-							DSS->DSS[p]->Active = 0;
+							p->Active = false;
 						}
 					}
-					SXPR->BaseDialogActive = 0;
+					SXPR->BaseDialogActive = false;
 				}
 			}
 		}
@@ -2011,7 +2001,7 @@ extern "C" __declspec( dllexport ) char* SXP_GetVar(int Index, char* Name)
 		OneSicWindow* OSW = SXP[Index].Windows[SXP[Index].CurWPosition];
 		return OSW->GetVar(Name);
 	}
-	else return nullptr;
+	return nullptr;
 };
 
 void OneSicWindow::SaveCookies()
@@ -2120,10 +2110,7 @@ DWORD GetTableHash(OneSXPTable* TB, int Line)
 		for (int j = 0; j < nc; j++)if (TB->COLMOPT[j] == 0)strcat(CC, TB->Lines[Line * nc + j]);
 		return GetHVAL(CC);
 	}
-	else
-	{
-		return 0;
-	}
+	return 0;
 }
 
 extern __declspec( dllimport ) bool GameInProgress;
@@ -2149,7 +2136,7 @@ void sicExplorer::SendTableRefresh(char* Name, char* server)
 			int sz = P1.UnParse(nullptr, 0);
 			char* dst = (char*)malloc(sz + 4);
 			sz = P1.UnParse(dst, sz);
-			SendGlobalRequest(this, dst, 0);
+			SendGlobalRequest(this, dst, false);
 			free(HSET);
 			free(dst);
 		};
@@ -2203,11 +2190,11 @@ int sicExplorer::GetGPPictureIndex(char* NAME0)
 			};
 		return GPS.PreLoadGPImage(CCX);
 	};
-	bool Found = 0;
+	bool Found = false;
 	for (int i = 0; i < NDownl; i++)
 		if (!strcmp(DOWNL[i].URL, Name))
 		{
-			Found = 1;
+			Found = true;
 			if ((!DOWNL[i].Ready) && CurWPosition < 128 * 8)
 			{
 				DOWNL[i].ReqMask[CurWPosition >> 3] |= 1 << (CurWPosition & 7);
@@ -2222,7 +2209,7 @@ int sicExplorer::GetGPPictureIndex(char* NAME0)
 		};
 		//parsing request
 		strcpy(DOWNL[NDownl].URL, Name);
-		DOWNL[NDownl].Ready = 0;
+		DOWNL[NDownl].Ready = false;
 		strcpy(DOWNL[NDownl].Name, Name + 3);
 		ParsedRQ P1;
 
@@ -2234,7 +2221,7 @@ int sicExplorer::GetGPPictureIndex(char* NAME0)
 		P1.AddParam(DOWNL[NDownl].Name, strlen(DOWNL[NDownl].Name) + 1);
 		char CCC[512];
 		P1.UnParse(CCC, 512);
-		DOWNL[NDownl].Handle = SendGlobalRequest(this, CCC, 0);
+		DOWNL[NDownl].Handle = SendGlobalRequest(this, CCC, false);
 		NDownl++;
 	};
 	return -1;
@@ -2295,8 +2282,8 @@ void OneSicWindow::ReParse()
 	strcpy(WinID, WID);
 	ParseTheWholeText();
 	LoadCookies();
-	Ready = 1;
-	Parsed = 1;
+	Ready = true;
+	Parsed = true;
 
 	for (int i = 0; i < NBOX; i++)
 	{

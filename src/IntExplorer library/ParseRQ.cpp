@@ -1,7 +1,5 @@
 #include "../Main executable/common.h"
 #include "ParseRQ.h"
-#include <crtdbg.h>
-#include <assert.h>
 
 ParsedRQ::ParsedRQ()
 {
@@ -62,11 +60,11 @@ int GetHVal(char c)
 	{
 		return c - '0';
 	}
-	else if (c >= 'A' && c <= 'F')
+	if (c >= 'A' && c <= 'F')
 	{
 		return c - 'A' + 10;
 	}
-	else return 0;
+	return 0;
 };
 
 void ParsedRQ::Parse(char* s)
@@ -85,7 +83,7 @@ void ParsedRQ::Parse(char* s)
 		DevName[pos] = 0;
 		pos++;
 	};
-	bool doit = 1;
+	bool doit = true;
 	do
 	{
 		int p1 = pos;
@@ -126,7 +124,7 @@ void ParsedRQ::Parse(char* s)
 		};
 		if (c == 0)
 		{
-			doit = 0;
+			doit = false;
 		}
 	}
 	while (doit);

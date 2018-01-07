@@ -1,8 +1,5 @@
 #include "../Main executable/common.h"
 #include "IntExplorer.h"
-#include "ParseRQ.h"
-#include <crtdbg.h>
-#include <assert.h>
 #include "bmptool.h"
 #include "GameonMap.h"
 
@@ -145,11 +142,11 @@ void OneMap::LoadMapData(sicExplorer* SXP)
 		{
 			SCALE = (OneScale*)realloc(SCALE, (NScales + 1) * sizeof OneScale);
 			SCALE[NScales].Data = Data;
-			SCALE[NScales].Loaded = 1;
+			SCALE[NScales].Loaded = true;
 			SCALE[NScales].Lx = BM.biWidth;
 			SCALE[NScales].Ly = BM.biHeight;
 			SCALE[NScales].Scale = i;
-			SCALE[NScales].Colored = 0;
+			SCALE[NScales].Colored = false;
 			SCALE[NScales].ColoredData = NULL;
 			SCALE[NScales].FONT[0] = 0;
 			NScales++;
@@ -435,11 +432,11 @@ void OneMap::ShowMapPart()
 				BID = OMP->GPID[j];
 			};
 		};
-		OMP->Drawn = 0;
+		OMP->Drawn = false;
 		if (BID != -1)
 		{
 			GPS.ShowGP(x - OMP->dx, y - OMP->dy, BID, OMP->Sprite, 0);
-			OMP->Drawn = 1;
+			OMP->Drawn = true;
 			OMP->LastX = x - OMP->dx;
 			OMP->LastY = y - OMP->dy;
 			OMP->LastGPID = BID;
@@ -603,7 +600,7 @@ void OneMap::UpdateMapData(byte* Date)
 		{
 			if (SCALE[i].ColoredData)free(SCALE[i].ColoredData);
 			SCALE[i].ColoredData = NULL;
-			SCALE[i].Colored = 0;
+			SCALE[i].Colored = false;
 		};
 	};
 };

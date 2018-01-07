@@ -207,8 +207,7 @@ int ArraySearch(DArray array, const void* key, ArrayCompareFn comparator,
 		                array->count - fromIndex, array->elemsize, comparator);
 	if (res != NULL && found)
 		return (((char *)res - (char *)array->list) / array->elemsize);
-	else
-		return NOT_FOUND;
+	return NOT_FOUND;
 }
 
 

@@ -18,7 +18,6 @@ devsupport@gamespy.com
 /*************
 ** INCLUDES **
 *************/
-#include <stdio.h>
 #include "chat.h"
 #if defined(applec) || defined(THINK_C) || defined(__MWERKS__) && !defined(__KATANA__) && !defined(__mips64)
 	#include "::nonport.h"

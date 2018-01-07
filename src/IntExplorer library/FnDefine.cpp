@@ -4,7 +4,6 @@
 #include <crtdbg.h>
 #include "GameOnMap.h"
 #include <sys/stat.h>
-#include <sys/types.h>
 #include "ParseRQ.h"
 
 //#txt[%...](%...:[...position...],{...}...,"...{..}...")
@@ -63,7 +62,7 @@ void SendSmartRequest(sicExplorer* SXP, char* Str)
 				{
 					memcpy(VAR, request_substring + 1, L);
 					VAR[L] = 0;
-					bool repl = 0;
+					bool repl = false;
 					for (int pp = SXP->CurWPosition; pp >= 0 && pp >= SXP->CurWPosition - 1; pp--)
 					{
 						OneSicWindow* OSW = SXP->Windows[pp];
@@ -95,7 +94,7 @@ void SendSmartRequest(sicExplorer* SXP, char* Str)
 								char VAR1[64];
 								sprintf(VAR1, "<%s>", VAR);
 								Replace(&request_string, VAR1, s3, L3);
-								repl = 1;
+								repl = true;
 								request_substring = request_string;
 								j = OSW->NVARS;
 								_ExFree(s3);
@@ -112,7 +111,7 @@ void SendSmartRequest(sicExplorer* SXP, char* Str)
 	request_substring = request_string;
 	ParsedRQ PR;
 	PR.Parse(request_string);
-	bool change = 0;
+	bool change = false;
 	for (int i = 0; i < PR.NComm; i++)
 	{
 		int N = PR.Comm[i].NParams;
@@ -138,7 +137,7 @@ void SendSmartRequest(sicExplorer* SXP, char* Str)
 								PR.Comm[i].ParamSize[j] = sz;
 								PR.Comm[i].Params[j] = (char*)realloc(PR.Comm[i].Params[j], sz);
 								RBlockRead(F, PR.Comm[i].Params[j], sz);
-								change = 1;
+								change = true;
 							};
 							RClose(F);
 						};
@@ -153,7 +152,7 @@ void SendSmartRequest(sicExplorer* SXP, char* Str)
 			PR.UnParse(request_string, sz);
 		};
 	};
-	SendGlobalRequest(SXP, request_string, 1);
+	SendGlobalRequest(SXP, request_string, true);
 	free(request_string);
 };
 int ReadNumber(char* s, int* L, int vmax);
@@ -179,15 +178,15 @@ bool ADI_Txt(sicExplorer* SXP, DialogsSystem* DSS, int* x, int* y, int* x1, int*
 		int pos = 0;
 
 		int UsedActives = 0;
-		bool curactive = 0;
-		bool wasactive = 0;
+		bool curactive = false;
+		bool wasactive = false;
 
 		char curstr[512];
 		int xcs0 = 0;
 		int cslx = 0;
 		curstr[0] = 0;
 		int csmaxdy = fdy;
-		bool eof = 0;
+		bool eof = false;
 		SimpleDialog* SDS[1024];
 		int NSDS = 0;
 		int maxdy = fdy;
@@ -205,8 +204,8 @@ bool ADI_Txt(sicExplorer* SXP, DialogsSystem* DSS, int* x, int* y, int* x1, int*
 			int a_sp = 0;
 			int p_sp = 0;
 			int reallx = 0;
-			bool doit = 1;
-			bool eoln = 0;
+			bool doit = true;
+			bool eoln = false;
 			wasactive = curactive;
 			do
 			{
@@ -217,28 +216,28 @@ bool ADI_Txt(sicExplorer* SXP, DialogsSystem* DSS, int* x, int* y, int* x1, int*
 					+ lx > Lx)
 				{
 					//end of phrase
-					doit = 0;
+					doit = false;
 				}
 				else if (!c)
 				{
-					doit = 0;
-					eof = 1;
+					doit = false;
+					eof = true;
 				}
 				else if (c == 13 || c == 10)
 				{
-					eoln = 1;
+					eoln = true;
 					if (s[pos + 1] == 10 || s[pos + 1] == 13)pos++;
 					pos++;
 				}
 				else if (c == '{' && !ntotsym)
 				{
-					curactive = 1;
+					curactive = true;
 					UsedActives++;
 					pos++;
 				}
 				else if (c == '}' && !ntotsym)
 				{
-					curactive = 0;
+					curactive = false;
 					pos++;
 				}
 				else if (c == '|' && !ntotsym)
@@ -275,7 +274,7 @@ bool ADI_Txt(sicExplorer* SXP, DialogsSystem* DSS, int* x, int* y, int* x1, int*
 						};
 					};
 					OneWord[0] = 0;
-					doit = 0;
+					doit = false;
 					//
 				}
 				else
@@ -476,7 +475,7 @@ void CBB_Process(sicExplorer* SXP, void* Data, int size)
 		if (strcmp(CC, var))
 		{
 			sprintf(var, "%d", ADCD->CBB->CurLine);
-			if (ADCD->URL[0])SendGlobalRequest(SXP, ADCD->URL, 1);
+			if (ADCD->URL[0])SendGlobalRequest(SXP, ADCD->URL, true);
 		};
 	};
 };
@@ -551,7 +550,7 @@ void CBB_Process2(sicExplorer* SXP, void* Data, int size)
 		if (strcmp(var, ADCD->IDS[ADCD->CBB->CurLine]))
 		{
 			strcpy(var, ADCD->IDS[ADCD->CBB->CurLine]);
-			if (ADCD->URL[0])SendGlobalRequest(SXP, ADCD->URL, 1);
+			if (ADCD->URL[0])SendGlobalRequest(SXP, ADCD->URL, true);
 		};
 	};
 };
@@ -655,41 +654,38 @@ bool ADI_Btn(sicExplorer* SXP, DialogsSystem* DSS, int* x, int* y, int* x1, int*
 		};
 		return true;
 	}
+	int sbgp = SXP->GetGPPictureIndex(OSW->stb_gp_file);
+	if (sbgp == -1)return true;
+
+	*y += OSW->stb_wholedy;
+	*x += OSW->stb_wholedx;
+	*y1 += OSW->stb_wholedy;
+	*x1 += OSW->stb_wholedx;
+
+	RLCFont* AFONT = SXP->GetFontByName("XXYF");
+	RLCFont* MFONT = SXP->GetFontByName("XXWF");
+	GP_TextButton* GPB;
+
+	if (CurPalette == 0)
+	{
+		GPB = DSS->addGP_TextButtonLimited(nullptr, *x, *y,
+		                                   Param[0], sbgp, 14, 17, 124, MFONT, AFONT);
+		GPB->FontDy--;
+	}
 	else
 	{
-		int sbgp = SXP->GetGPPictureIndex(OSW->stb_gp_file);
-		if (sbgp == -1)return true;
-
-		*y += OSW->stb_wholedy;
-		*x += OSW->stb_wholedx;
-		*y1 += OSW->stb_wholedy;
-		*x1 += OSW->stb_wholedx;
-
-		RLCFont* AFONT = SXP->GetFontByName("XXYF");
-		RLCFont* MFONT = SXP->GetFontByName("XXWF");
-		GP_TextButton* GPB;
-
-		if (CurPalette == 0)
-		{
-			GPB = DSS->addGP_TextButtonLimited(nullptr, *x, *y,
-			                                   Param[0], sbgp, 14, 17, 124, MFONT, AFONT);
-			GPB->FontDy--;
-		}
-		else
-		{
-			GPB = DSS->addGP_TextButtonLimited(nullptr, *x, *y,
-			                                   Param[0], sbgp, 14, 17, 124, MFONT, AFONT);
-			GPB->FontDy--;
-		};
-		if (NActive)
-		{
-			GPB->AllocPtr = (char*)_ExMalloc(strlen(Active[0]) + 1);
-			strcpy(GPB->AllocPtr, Active[0]);
-			GPB->OnUserClick = &SendToServer;
-			GPB->UserParam = int(SXP);
-		};
-		return true;
+		GPB = DSS->addGP_TextButtonLimited(nullptr, *x, *y,
+		                                   Param[0], sbgp, 14, 17, 124, MFONT, AFONT);
+		GPB->FontDy--;
 	};
+	if (NActive)
+	{
+		GPB->AllocPtr = (char*)_ExMalloc(strlen(Active[0]) + 1);
+		strcpy(GPB->AllocPtr, Active[0]);
+		GPB->OnUserClick = &SendToServer;
+		GPB->UserParam = int(SXP);
+	};
+	return true;;
 };
 //---------------standart button----------------
 //#sbtn[%...](%...[...],{ref},"text")
@@ -753,7 +749,7 @@ void CHK_Process(sicExplorer* SXP, void* Data, int size)
 			if (strcmp(var, ADCD->DEF_st1))
 			{
 				strcpy(var, ADCD->DEF_st1);
-				if (ADCD->URL[0])SendGlobalRequest(SXP, ADCD->URL, 1);
+				if (ADCD->URL[0])SendGlobalRequest(SXP, ADCD->URL, true);
 			};
 		}
 		else
@@ -761,7 +757,7 @@ void CHK_Process(sicExplorer* SXP, void* Data, int size)
 			if (strcmp(var, ADCD->DEF_st0))
 			{
 				strcpy(var, ADCD->DEF_st0);
-				if (ADCD->URL[0])SendGlobalRequest(SXP, ADCD->URL, 1);
+				if (ADCD->URL[0])SendGlobalRequest(SXP, ADCD->URL, true);
 			};
 		};
 	};
@@ -781,11 +777,11 @@ bool ADI_Chk(sicExplorer* SXP, DialogsSystem* DSS, int* x, int* y, int* x1, int*
 	strcat(cc, Param[0]);
 	if (CurPalette == 0)
 	{
-		CB = DSS->addGP_CheckBox(nullptr, *x, *y, cc, PFONT, AFONT, 0, 0, IBOR0, 30, 31, 29);
+		CB = DSS->addGP_CheckBox(nullptr, *x, *y, cc, PFONT, AFONT, 0, false, IBOR0, 30, 31, 29);
 	}
 	else
 	{
-		CB = DSS->addGP_CheckBox(nullptr, *x, *y, cc, PFONT, AFONT, 0, 0, IBOR2, 30, 31, 29);
+		CB = DSS->addGP_CheckBox(nullptr, *x, *y, cc, PFONT, AFONT, 0, false, IBOR2, 30, 31, 29);
 	};
 	CB->Sprite3 = 32;
 	if (NActive && Active[0][0] == '%')
@@ -812,7 +808,7 @@ bool ADI_Chk(sicExplorer* SXP, DialogsSystem* DSS, int* x, int* y, int* x1, int*
 			if (!strcmp(VAR, Param[2]))CB->State = 1;
 		};
 	};
-	return 1;
+	return true;
 };
 //-------------radio button------------
 //#rad[%...](%...[...],{%var},"text","grp","val1","val2","start")
@@ -832,11 +828,11 @@ bool ADI_Rad(sicExplorer* SXP, DialogsSystem* DSS, int* x, int* y, int* x1, int*
 	int grp = atoi(Param[1]);
 	if (CurPalette == 0)
 	{
-		CB = DSS->addGP_CheckBox(nullptr, *x, *y, cc, PFONT, AFONT, grp, 0, IBOR0, 34, 35, 33);
+		CB = DSS->addGP_CheckBox(nullptr, *x, *y, cc, PFONT, AFONT, grp, false, IBOR0, 34, 35, 33);
 	}
 	else
 	{
-		CB = DSS->addGP_CheckBox(nullptr, *x, *y, cc, PFONT, AFONT, grp, 0, IBOR2, 34, 35, 33);
+		CB = DSS->addGP_CheckBox(nullptr, *x, *y, cc, PFONT, AFONT, grp, false, IBOR2, 34, 35, 33);
 	};
 	CB->Sprite3 = 36;
 	if (NActive && Active[0][0] == '%')
@@ -863,7 +859,7 @@ bool ADI_Rad(sicExplorer* SXP, DialogsSystem* DSS, int* x, int* y, int* x1, int*
 			strcpy(ADCD->URL, Active[1]);
 		};
 	};
-	return 1;
+	return true;
 };
 //------------------panel----------------
 //#pan[%...](%...[...],"style")
@@ -951,13 +947,13 @@ bool ADI_Sort(sicExplorer* SXP, DialogsSystem* DSS, int* x, int* y, int* x1, int
 	int grp = atoi(Param[1]);
 	if (CurPalette == 0)
 	{
-		CB = DSS->addGP_CheckBox(nullptr, *x, *y, cc, AFONT, PFONT, grp, 0, IBOR0, 26, 23, 20);
+		CB = DSS->addGP_CheckBox(nullptr, *x, *y, cc, AFONT, PFONT, grp, false, IBOR0, 26, 23, 20);
 	}
 	else
 	{
-		CB = DSS->addGP_CheckBox(nullptr, *x, *y, cc, AFONT, PFONT, grp, 0, IBOR2, 26, 23, 20);
+		CB = DSS->addGP_CheckBox(nullptr, *x, *y, cc, AFONT, PFONT, grp, false, IBOR2, 26, 23, 20);
 	};
-	CB->Central = 1;
+	CB->Central = true;
 	CB->x1 = *x1;
 	if (NActive && Active[0][0] == '%')
 	{
@@ -984,7 +980,7 @@ bool ADI_Sort(sicExplorer* SXP, DialogsSystem* DSS, int* x, int* y, int* x1, int
 			}
 		}
 	}
-	return 1;
+	return true;
 }
 
 //------------empty polygone-----------
@@ -1076,12 +1072,12 @@ bool ADI_Stbl(sicExplorer* SXP, DialogsSystem* DSS, int* x, int* y, int* x1, int
 
 	int cpr = 2 + nclm * 2;
 	int cury = *y;
-	bool doit = 1;
+	bool doit = true;
 	do
 	{
 		int thisLy = 0;
 		if (cpr < NParam)thisLy = atoi(Param[cpr]);
-		else doit = 0;
+		else doit = false;
 		cpr++;
 		if (doit)
 		{
@@ -1105,10 +1101,10 @@ bool ADI_Stbl(sicExplorer* SXP, DialogsSystem* DSS, int* x, int* y, int* x1, int
 						tmps[255] = 0;
 					}
 
-					bool active = 0;
+					bool active = false;
 					if (tmps[0] == '{')
 					{
-						active = 1;
+						active = true;
 						strcpy(tmps, tmps + 1);
 					}
 
@@ -1197,7 +1193,7 @@ bool ADI_Stbl(sicExplorer* SXP, DialogsSystem* DSS, int* x, int* y, int* x1, int
 						};
 					};
 				}
-				else doit = 0;
+				else doit = false;
 				curx += LXI[p];
 			};
 		};
@@ -1421,7 +1417,7 @@ void Process_DBTBL(sicExplorer* SXP, void* PData, int size)
 		bool change;
 		do
 		{
-			change = 0;
+			change = false;
 			int NL = TBL->TBL->NLines;
 			int ccl = TBL->CurSortColumn;
 			int ncl = TBL->NColumns;
@@ -1456,7 +1452,7 @@ void Process_DBTBL(sicExplorer* SXP, void* PData, int size)
 						TBL->TBL->Lines[cp0 + p] = TBL->TBL->Lines[cp0 + ncl + p];
 						TBL->TBL->Lines[cp0 + ncl + p] = cc;
 					}
-					change = 1;
+					change = true;
 				}
 				cp += ncl;
 				cp0 += ncl;
@@ -1471,7 +1467,7 @@ void Process_DBTBL(sicExplorer* SXP, void* PData, int size)
 	TBL->TBL->NRefs = 0;
 	for (int i = 0; i < nl; i++)
 	{
-		bool good = 1;
+		bool good = true;
 		for (int j = 0; j < ncl && good; j++)
 		{
 			int fcl = 0;
@@ -1516,7 +1512,7 @@ void Process_DBTBL(sicExplorer* SXP, void* PData, int size)
 				case 1: //STR
 					if (!strstr(sv1, TBL->COLM[j].FiltParam))
 					{
-						good = 0;
+						good = false;
 					}
 					break;
 				case 2: //PING
@@ -1780,9 +1776,9 @@ bool ADI_AddDBTBL(sicExplorer* SXP, DialogsSystem* DSS, int* x, int* y, int* x1,
 				Ty0 += OSW->CTBL_UpperLY;
 
 				CheckBox* CB;
-				CB = DSS->addGP_CheckBox(nullptr, xx + OSW->b_DxL, (*y) + OSW->b_DyL, ADI->COLM[i].Message, AFONT, PFONT, 1, 0,
+				CB = DSS->addGP_CheckBox(nullptr, xx + OSW->b_DxL, (*y) + OSW->b_DyL, ADI->COLM[i].Message, AFONT, PFONT, 1, false,
 				                         CurPalette ? IBOR2 : IBOR0, 26, 23, 20);
-				CB->Central = 1;
+				CB->Central = true;
 				CB->x1 = xx1 - OSW->b_DxR + dw;
 
 				ADI->COLM[i].SORT = CB;
@@ -2001,7 +1997,7 @@ bool ADI_Hint(sicExplorer* SXP, DialogsSystem* DSS, int* x, int* y, int* x1, int
 						{
 							DSS_Boxes->DSS[q]->Hint = (char*)malloc(strlen(Hint) + 1);
 							strcpy(DSS_Boxes->DSS[q]->Hint, Hint);
-							DSS_Boxes->DSS[q]->AllocHint = 1;
+							DSS_Boxes->DSS[q]->AllocHint = true;
 						}
 					}
 				}
@@ -2192,11 +2188,8 @@ bool ADI_ftxt(sicExplorer* SXP, DialogsSystem* DSS, int* x, int* y, int* x1, int
 		TV->y1 = *y1;
 		return true;
 	}
-	else
-	{
-		*y1 = *y;
-		return false;
-	};
+	*y1 = *y;
+	return false;;
 };
 
 //---------------------------file browser-----------------------------
@@ -2218,10 +2211,10 @@ FBrowse* LastBrowse = nullptr;
 
 void SortStrings(char** strs, int nstr)
 {
-	bool change = 0;
+	bool change = false;
 	do
 	{
-		change = 0;
+		change = false;
 		for (int i = 1; i < nstr; i++)
 		{
 			if (strcmp(strs[i], strs[i - 1]) < 0)
@@ -2229,7 +2222,7 @@ void SortStrings(char** strs, int nstr)
 				char* s = strs[i];
 				strs[i] = strs[i - 1];
 				strs[i - 1] = s;
-				change = 1;
+				change = true;
 			};
 		};
 	}
@@ -2532,256 +2525,256 @@ void InitIFNS()
 	IFNS = new OneInterfaceFunction[N_IFNS];
 	strcpy(IFNS[0].Name, "#txt");
 	IFNS[0].AddInterface = &ADI_Txt;
-	IFNS[0].ReqActiv = 1;
-	IFNS[0].ReqCoor = 1;
-	IFNS[0].ReqName = 1;
-	IFNS[0].ReqParam = 1;
+	IFNS[0].ReqActiv = true;
+	IFNS[0].ReqCoor = true;
+	IFNS[0].ReqName = true;
+	IFNS[0].ReqParam = true;
 	strcpy(IFNS[0].param, "l");
 
 	strcpy(IFNS[1].Name, "#ctxt");
 	IFNS[1].AddInterface = &ADI_Txt;
-	IFNS[1].ReqActiv = 1;
-	IFNS[1].ReqCoor = 1;
-	IFNS[1].ReqName = 1;
-	IFNS[1].ReqParam = 1;
+	IFNS[1].ReqActiv = true;
+	IFNS[1].ReqCoor = true;
+	IFNS[1].ReqName = true;
+	IFNS[1].ReqParam = true;
 	strcpy(IFNS[1].param, "c");
 
 	strcpy(IFNS[2].Name, "#rtxt");
 	IFNS[2].AddInterface = &ADI_Txt;
-	IFNS[2].ReqActiv = 1;
-	IFNS[2].ReqCoor = 1;
-	IFNS[2].ReqName = 1;
-	IFNS[2].ReqParam = 1;
+	IFNS[2].ReqActiv = true;
+	IFNS[2].ReqCoor = true;
+	IFNS[2].ReqName = true;
+	IFNS[2].ReqParam = true;
 	strcpy(IFNS[2].param, "r");
 
 	strcpy(IFNS[3].Name, "#edit");
 	IFNS[3].AddInterface = &ADI_Edit;
-	IFNS[3].ReqActiv = 1;
-	IFNS[3].ReqCoor = 1;
-	IFNS[3].ReqName = 1;
-	IFNS[3].ReqParam = 1;
+	IFNS[3].ReqActiv = true;
+	IFNS[3].ReqCoor = true;
+	IFNS[3].ReqName = true;
+	IFNS[3].ReqParam = true;
 	strcpy(IFNS[3].param, "");
 
 	strcpy(IFNS[4].Name, "#cbb");
 	IFNS[4].AddInterface = &ADI_Combo;
-	IFNS[4].ReqActiv = 1;
-	IFNS[4].ReqCoor = 1;
-	IFNS[4].ReqName = 1;
-	IFNS[4].ReqParam = 1;
+	IFNS[4].ReqActiv = true;
+	IFNS[4].ReqCoor = true;
+	IFNS[4].ReqName = true;
+	IFNS[4].ReqParam = true;
 	strcpy(IFNS[4].param, "");
 
 	strcpy(IFNS[5].Name, "#poly");
 	IFNS[5].AddInterface = &ADI_Poly;
-	IFNS[5].ReqActiv = 0;
-	IFNS[5].ReqCoor = 1;
-	IFNS[5].ReqName = 1;
-	IFNS[5].ReqParam = 1;
+	IFNS[5].ReqActiv = false;
+	IFNS[5].ReqCoor = true;
+	IFNS[5].ReqName = true;
+	IFNS[5].ReqParam = true;
 	strcpy(IFNS[5].param, "");
 
 	strcpy(IFNS[6].Name, "#btn");
 	IFNS[6].AddInterface = &ADI_Btn;
-	IFNS[6].ReqActiv = 1;
-	IFNS[6].ReqCoor = 1;
-	IFNS[6].ReqName = 1;
-	IFNS[6].ReqParam = 1;
+	IFNS[6].ReqActiv = true;
+	IFNS[6].ReqCoor = true;
+	IFNS[6].ReqName = true;
+	IFNS[6].ReqParam = true;
 	strcpy(IFNS[6].param, "");
 
 	strcpy(IFNS[7].Name, "#chk");
 	IFNS[7].AddInterface = &ADI_Chk;
-	IFNS[7].ReqActiv = 1;
-	IFNS[7].ReqCoor = 1;
-	IFNS[7].ReqName = 1;
-	IFNS[7].ReqParam = 1;
+	IFNS[7].ReqActiv = true;
+	IFNS[7].ReqCoor = true;
+	IFNS[7].ReqName = true;
+	IFNS[7].ReqParam = true;
 	strcpy(IFNS[7].param, "");
 
 	strcpy(IFNS[8].Name, "#rad");
 	IFNS[8].AddInterface = &ADI_Rad;
-	IFNS[8].ReqActiv = 1;
-	IFNS[8].ReqCoor = 1;
-	IFNS[8].ReqName = 1;
-	IFNS[8].ReqParam = 1;
+	IFNS[8].ReqActiv = true;
+	IFNS[8].ReqCoor = true;
+	IFNS[8].ReqName = true;
+	IFNS[8].ReqParam = true;
 	strcpy(IFNS[8].param, "");
 
 	strcpy(IFNS[9].Name, "#pan");
 	IFNS[9].AddInterface = &ADI_Pan;
-	IFNS[9].ReqActiv = 0;
-	IFNS[9].ReqCoor = 1;
-	IFNS[9].ReqName = 1;
-	IFNS[9].ReqParam = 1;
+	IFNS[9].ReqActiv = false;
+	IFNS[9].ReqCoor = true;
+	IFNS[9].ReqName = true;
+	IFNS[9].ReqParam = true;
 	strcpy(IFNS[9].param, "");
 
 	strcpy(IFNS[10].Name, "#sort");
 	IFNS[10].AddInterface = &ADI_Sort;
-	IFNS[10].ReqActiv = 1;
-	IFNS[10].ReqCoor = 1;
-	IFNS[10].ReqName = 1;
-	IFNS[10].ReqParam = 1;
+	IFNS[10].ReqActiv = true;
+	IFNS[10].ReqCoor = true;
+	IFNS[10].ReqName = true;
+	IFNS[10].ReqParam = true;
 	strcpy(IFNS[10].param, "");
 
 	strcpy(IFNS[11].Name, "#stbl");
 	IFNS[11].AddInterface = &ADI_Stbl;
-	IFNS[11].ReqActiv = 1;
-	IFNS[11].ReqCoor = 1;
-	IFNS[11].ReqName = 1;
-	IFNS[11].ReqParam = 1;
+	IFNS[11].ReqActiv = true;
+	IFNS[11].ReqCoor = true;
+	IFNS[11].ReqName = true;
+	IFNS[11].ReqParam = true;
 	strcpy(IFNS[11].param, "");
 
 	strcpy(IFNS[12].Name, "#sbtn");
 	IFNS[12].AddInterface = &ADI_SBtn;
-	IFNS[12].ReqActiv = 1;
-	IFNS[12].ReqCoor = 1;
-	IFNS[12].ReqName = 1;
-	IFNS[12].ReqParam = 1;
+	IFNS[12].ReqActiv = true;
+	IFNS[12].ReqCoor = true;
+	IFNS[12].ReqName = true;
+	IFNS[12].ReqParam = true;
 	strcpy(IFNS[12].param, "");
 
 	strcpy(IFNS[13].Name, "#DBTBL");
 	IFNS[13].AddInterface = &ADI_AddDBTBL;
-	IFNS[13].ReqActiv = 1;
-	IFNS[13].ReqCoor = 1;
-	IFNS[13].ReqName = 1;
-	IFNS[13].ReqParam = 1;
+	IFNS[13].ReqActiv = true;
+	IFNS[13].ReqCoor = true;
+	IFNS[13].ReqName = true;
+	IFNS[13].ReqParam = true;
 
 	strcpy(IFNS[14].Name, "#pix");
 	IFNS[14].AddInterface = &ADI_Pix;
-	IFNS[14].ReqActiv = 1;
-	IFNS[14].ReqCoor = 1;
-	IFNS[14].ReqName = 1;
-	IFNS[14].ReqParam = 1;
+	IFNS[14].ReqActiv = true;
+	IFNS[14].ReqCoor = true;
+	IFNS[14].ReqName = true;
+	IFNS[14].ReqParam = true;
 	strcpy(IFNS[14].param, "");
 
 	strcpy(IFNS[15].Name, "#ubtn");
 	IFNS[15].AddInterface = &ADI_Ubtn;
-	IFNS[15].ReqActiv = 1;
-	IFNS[15].ReqCoor = 1;
-	IFNS[15].ReqName = 1;
-	IFNS[15].ReqParam = 1;
+	IFNS[15].ReqActiv = true;
+	IFNS[15].ReqCoor = true;
+	IFNS[15].ReqName = true;
+	IFNS[15].ReqParam = true;
 	strcpy(IFNS[15].param, "");
 
 	strcpy(IFNS[16].Name, "#cbb2");
 	IFNS[16].AddInterface = &ADI_Combo2;
-	IFNS[16].ReqActiv = 1;
-	IFNS[16].ReqCoor = 1;
-	IFNS[16].ReqName = 1;
-	IFNS[16].ReqParam = 1;
+	IFNS[16].ReqActiv = true;
+	IFNS[16].ReqCoor = true;
+	IFNS[16].ReqName = true;
+	IFNS[16].ReqParam = true;
 	strcpy(IFNS[16].param, "");
 
 	strcpy(IFNS[17].Name, "#gpbtn");
 	IFNS[17].AddInterface = &ADI_gpBtn;
-	IFNS[17].ReqActiv = 1;
-	IFNS[17].ReqCoor = 1;
-	IFNS[17].ReqName = 1;
-	IFNS[17].ReqParam = 1;
+	IFNS[17].ReqActiv = true;
+	IFNS[17].ReqCoor = true;
+	IFNS[17].ReqName = true;
+	IFNS[17].ReqParam = true;
 	strcpy(IFNS[17].param, "");
 
 	strcpy(IFNS[18].Name, "#def_gp_btn");
 	IFNS[18].AddInterface = &ADI_def_gp_btn;
-	IFNS[18].ReqActiv = 0;
-	IFNS[18].ReqCoor = 0;
-	IFNS[18].ReqName = 0;
-	IFNS[18].ReqParam = 1;
+	IFNS[18].ReqActiv = false;
+	IFNS[18].ReqCoor = false;
+	IFNS[18].ReqName = false;
+	IFNS[18].ReqParam = true;
 	strcpy(IFNS[18].param, "");
 
 	strcpy(IFNS[19].Name, "#cpix");
 	IFNS[19].AddInterface = &ADI_Pix;
-	IFNS[19].ReqActiv = 1;
-	IFNS[19].ReqCoor = 1;
-	IFNS[19].ReqName = 1;
-	IFNS[19].ReqParam = 1;
+	IFNS[19].ReqActiv = true;
+	IFNS[19].ReqCoor = true;
+	IFNS[19].ReqName = true;
+	IFNS[19].ReqParam = true;
 	strcpy(IFNS[19].param, "1");
 
 	strcpy(IFNS[20].Name, "#apan");
 	IFNS[20].AddInterface = &ADI_APan;
-	IFNS[20].ReqActiv = 1;
-	IFNS[20].ReqCoor = 1;
-	IFNS[20].ReqName = 1;
-	IFNS[20].ReqParam = 1;
+	IFNS[20].ReqActiv = true;
+	IFNS[20].ReqCoor = true;
+	IFNS[20].ReqName = true;
+	IFNS[20].ReqParam = true;
 	strcpy(IFNS[20].param, "");
 
 	strcpy(IFNS[21].Name, "#hint");
 	IFNS[21].AddInterface = &ADI_Hint;
-	IFNS[21].ReqActiv = 0;
-	IFNS[21].ReqCoor = 0;
-	IFNS[21].ReqName = 0;
-	IFNS[21].ReqParam = 1;
+	IFNS[21].ReqActiv = false;
+	IFNS[21].ReqCoor = false;
+	IFNS[21].ReqName = false;
+	IFNS[21].ReqParam = true;
 	strcpy(IFNS[21].param, "");
 
 	strcpy(IFNS[22].Name, "#hintparam");
 	IFNS[22].AddInterface = &ADI_HintParam;
-	IFNS[22].ReqActiv = 0;
-	IFNS[22].ReqCoor = 1;
-	IFNS[22].ReqName = 0;
-	IFNS[22].ReqParam = 1;
+	IFNS[22].ReqActiv = false;
+	IFNS[22].ReqCoor = true;
+	IFNS[22].ReqName = false;
+	IFNS[22].ReqParam = true;
 	strcpy(IFNS[22].param, "");
 
 	strcpy(IFNS[23].Name, "#time");
 	IFNS[23].AddInterface = &ADI_Time;
-	IFNS[23].ReqActiv = 0;
-	IFNS[23].ReqCoor = 0;
-	IFNS[23].ReqName = 0;
-	IFNS[23].ReqParam = 1;
+	IFNS[23].ReqActiv = false;
+	IFNS[23].ReqCoor = false;
+	IFNS[23].ReqName = false;
+	IFNS[23].ReqParam = true;
 	strcpy(IFNS[23].param, "");
 
 	strcpy(IFNS[24].Name, "#map");
 	IFNS[24].AddInterface = &ADI_Map;
-	IFNS[24].ReqActiv = 1;
-	IFNS[24].ReqCoor = 1;
-	IFNS[24].ReqName = 1;
-	IFNS[24].ReqParam = 0;
+	IFNS[24].ReqActiv = true;
+	IFNS[24].ReqCoor = true;
+	IFNS[24].ReqName = true;
+	IFNS[24].ReqParam = false;
 	strcpy(IFNS[24].param, "");
 
 	strcpy(IFNS[25].Name, "#getf");
 	IFNS[25].AddInterface = &ADI_getf;
-	IFNS[25].ReqActiv = 0;
-	IFNS[25].ReqCoor = 0;
-	IFNS[25].ReqName = 0;
-	IFNS[25].ReqParam = 1;
+	IFNS[25].ReqActiv = false;
+	IFNS[25].ReqCoor = false;
+	IFNS[25].ReqName = false;
+	IFNS[25].ReqParam = true;
 	strcpy(IFNS[25].param, "");
 
 	strcpy(IFNS[26].Name, "#ftxt");
 	IFNS[26].AddInterface = &ADI_ftxt;
-	IFNS[26].ReqActiv = 0;
-	IFNS[26].ReqCoor = 1;
-	IFNS[26].ReqName = 1;
-	IFNS[26].ReqParam = 1;
+	IFNS[26].ReqActiv = false;
+	IFNS[26].ReqCoor = true;
+	IFNS[26].ReqName = true;
+	IFNS[26].ReqParam = true;
 	strcpy(IFNS[26].param, "");
 
 	strcpy(IFNS[27].Name, "#murl");
 	IFNS[27].AddInterface = &ADI_murl;
-	IFNS[27].ReqActiv = 0;
-	IFNS[27].ReqCoor = 0;
-	IFNS[27].ReqName = 0;
-	IFNS[27].ReqParam = 1;
+	IFNS[27].ReqActiv = false;
+	IFNS[27].ReqCoor = false;
+	IFNS[27].ReqName = false;
+	IFNS[27].ReqParam = true;
 	strcpy(IFNS[27].param, "");
 
 	strcpy(IFNS[28].Name, "#uurl");
 	IFNS[28].AddInterface = &ADI_uurl;
-	IFNS[28].ReqActiv = 0;
-	IFNS[28].ReqCoor = 0;
-	IFNS[28].ReqName = 0;
-	IFNS[28].ReqParam = 1;
+	IFNS[28].ReqActiv = false;
+	IFNS[28].ReqCoor = false;
+	IFNS[28].ReqName = false;
+	IFNS[28].ReqParam = true;
 	strcpy(IFNS[28].param, "");
 
 	strcpy(IFNS[29].Name, "#fbrowse");
 	IFNS[29].AddInterface = &ADI_FBrowse;
-	IFNS[29].ReqActiv = 1;
-	IFNS[29].ReqCoor = 0;
-	IFNS[29].ReqName = 0;
-	IFNS[29].ReqParam = 1;
+	IFNS[29].ReqActiv = true;
+	IFNS[29].ReqCoor = false;
+	IFNS[29].ReqName = false;
+	IFNS[29].ReqParam = true;
 	strcpy(IFNS[29].param, "");
 
 	strcpy(IFNS[30].Name, "#ping");
 	IFNS[30].AddInterface = &ADI_Ping;
-	IFNS[30].ReqActiv = 0;
-	IFNS[30].ReqCoor = 1;
-	IFNS[30].ReqName = 1;
-	IFNS[30].ReqParam = 1;
+	IFNS[30].ReqActiv = false;
+	IFNS[30].ReqCoor = true;
+	IFNS[30].ReqName = true;
+	IFNS[30].ReqParam = true;
 	strcpy(IFNS[30].param, "");
 
 	strcpy(IFNS[31].Name, "#nfont");
 	IFNS[31].AddInterface = &ADI_NewFont;
-	IFNS[31].ReqActiv = 0;
-	IFNS[31].ReqCoor = 0;
-	IFNS[31].ReqName = 0;
-	IFNS[31].ReqParam = 1;
+	IFNS[31].ReqActiv = false;
+	IFNS[31].ReqCoor = false;
+	IFNS[31].ReqName = false;
+	IFNS[31].ReqParam = true;
 	strcpy(IFNS[31].param, "");
 };

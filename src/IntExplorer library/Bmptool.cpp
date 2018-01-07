@@ -1,8 +1,5 @@
 #include "../Main executable/common.h"
-#include "IntExplorer.h"
-#include "ParseRQ.h"
 #include <crtdbg.h>
-#include <assert.h>
 #include "bmptool.h"
 
 void SaveToBMP24(char* Name, int Lx, int Ly, byte* data)
@@ -55,7 +52,7 @@ bool ReadBMP24(char* Name, BMPformat* BM, byte** data)
 		RClose(f1);
 		return true;
 	}
-	else return false;
+	return false;
 };
 
 bool ReadBMP8(char* Name, BMPformat* BM, byte** data)
@@ -78,7 +75,7 @@ bool ReadBMP8(char* Name, BMPformat* BM, byte** data)
 		RClose(f1);
 		return true;
 	}
-	else return false;
+	return false;
 };
 
 bool ReadBMP8TOBPX(char* Name, byte** data)
@@ -104,7 +101,7 @@ bool ReadBMP8TOBPX(char* Name, byte** data)
 		RClose(f1);
 		return true;
 	}
-	else return false;
+	return false;
 };
 
 bool LoadBitmapLikeGrayscale(char* Name, int* Lx, int* Ly, byte** res)
@@ -174,7 +171,7 @@ DWORD GetSumm(char* Name)
 		SZZ &= 65535;
 		return SZZ;
 	}
-	else return 0;
+	return 0;
 };
 
 void SaveToBMP8(char* Name, int Lx, int Ly, byte* data, PAL3* pal)

@@ -86,9 +86,9 @@ PingEngine::~PingEngine()
 
 void PingEngine::Setup()
 {
-	IsInit = 0;
+	IsInit = false;
 	if (InitFailed || IsInit)return;
-	InitFailed = 1;
+	InitFailed = true;
 	WSADATA wsaData;
 	int bread;
 	int timeout = 1;
@@ -102,7 +102,7 @@ void PingEngine::Setup()
 	if (bread == SOCKET_ERROR)return;
 	u_long lArgP = 0x01;
 	ioctlsocket(sockRaw,FIONBIO, &lArgP);
-	IsInit = 1;
+	IsInit = true;
 };
 USHORT checksum(USHORT* buffer, int size);
 int seq_no = 0;
@@ -172,7 +172,7 @@ void PingEngine::Process()
 					BestID = i;
 					break;
 				}
-				else if (LastT != -1 && rt < LastT)
+				if (LastT != -1 && rt < LastT)
 				{
 					LastT = rt;
 					BestID = i;

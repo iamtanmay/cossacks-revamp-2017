@@ -1,5 +1,5 @@
 #include "../Main executable/common.h"
-#include "Chat\chat.h"
+#include "Chat/chat.h"
 #include "cs_chat.h"
 #include "../IntExplorer library/ParseRQ.h"
 #include <stdarg.h>
@@ -69,7 +69,7 @@ public:
 		{
 			char ccc[512];
 			char ccc1[512];
-			bool done = 0;
+			bool done = false;
 			do
 			{
 				done = ReadWinString(F, ccc, 511);
@@ -289,8 +289,8 @@ __declspec( dllimport ) void ShowClanString(int x, int y, char* s, byte State, R
 
 CustomBorder* CUBM;
 CustomBorder* CUBC;
-bool CM_Vis = 0;
-bool CC_Vis = 0;
+bool CM_Vis = false;
+bool CC_Vis = false;
 byte RCOLOR = 0;
 
 __declspec( dllimport ) int menu_x_off;
@@ -312,18 +312,18 @@ void Draw_PLIST(int x, int y, int Lx, int Ly, int Index, byte Active, int param)
 	{
 		if (Active == 1)
 		{
-			CUBC->Visible = 1;
+			CUBC->Visible = true;
 			CUBC->y = y;
 			CUBC->y1 = y + 25;
-			CC_Vis = 1;
+			CC_Vis = true;
 		}
 
 		if (Active == 2)
 		{
-			CUBM->Visible = 1;
+			CUBM->Visible = true;
 			CUBM->y = y;
 			CUBM->y1 = y + 25;
-			CM_Vis = 1;
+			CM_Vis = true;
 		}
 
 		char nickname[256];
@@ -476,7 +476,7 @@ void EnterPersonalMessage(char* Nick, bool Active)
 	                               290 + DL * 2,
 	                               20,
 	                               &WhiteFont, &YellowFont);
-	IB->Active = 1;
+	IB->Active = true;
 
 	char cc2[128];
 	sprintf(cc2, GetTextByID("ENTERMESS"), nick);
@@ -486,7 +486,7 @@ void EnterPersonalMessage(char* Nick, bool Active)
 
 	ItemChoose = -1;
 	LastKey = 0;
-	KeyPressed = 0;
+	KeyPressed = false;
 	do
 	{
 		ProcessMessages();
@@ -583,11 +583,11 @@ __declspec( dllexport ) void GetGameID(char* s)
 	}
 }
 
-bool NeedSmallSize = 0;
+bool NeedSmallSize = false;
 
-bool NeedBigSize = 0;
+bool NeedBigSize = false;
 
-bool LockResize = 0;
+bool LockResize = false;
 
 __declspec( dllexport ) void SetChatWState(int ID, int State)
 {
@@ -624,14 +624,14 @@ __declspec( dllimport ) void ClearGChat();
 
 __declspec( dllimport ) void SetCurPtr(int v);
 
-bool RunHomePageAnyway = 0;
+bool RunHomePageAnyway = false;
 
 __declspec( dllexport ) void GoHomeAnyway()
 {
-	RunHomePageAnyway = 1;
+	RunHomePageAnyway = true;
 }
 
-bool WasHere = 0;
+bool WasHere = false;
 
 __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 {
@@ -671,7 +671,7 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 	}
 	if (Active)
 	{
-		GameInProgress = 0;
+		GameInProgress = false;
 	}
 
 	if (Active && !CSYS.Connected)
@@ -707,7 +707,7 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 			DarkScreen();
 			ShowCentralMessage2C(GetTextByID("ICUNCON"), BOR2.GPID);
 			FlipPages();
-			KeyPressed = 0;
+			KeyPressed = false;
 			do
 			{
 				ProcessMessages();
@@ -736,14 +736,14 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 		INI.GetInt("PLLIST_SELECTION_X") + INI.GetInt("PLLIST_SELECTION_LX"),
 		0,
 		IB2.GPID, PXA, PXA, INI.GetInt("PLLIST_ACTIVE_BGROUND"), INI.GetInt("PLLIST_ACTIVE_BGROUND"));
-	CUBM->Visible = 0;
+	CUBM->Visible = false;
 	CUBC = DSS.addCustomBorder(
 		INI.GetInt("PLLIST_SELECTION_X"),
 		0,
 		INI.GetInt("PLLIST_SELECTION_X") + INI.GetInt("PLLIST_SELECTION_LX"),
 		0,
 		IB2.GPID, PXP, PXP, INI.GetInt("PLLIST_PASSIVE_BGROUND"), INI.GetInt("PLLIST_PASSIVE_BGROUND"));
-	CUBC->Visible = 0;
+	CUBC->Visible = false;
 
 	ChatViewer* CHVIEW[3];
 	VScrollBar* CHSCR[3];
@@ -760,12 +760,12 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 	                                    INI.GetInt("ENTER_CHAT_STRING_Y"),
 	                                    CHATMESSAGE, 200, INI.GetInt("ENTER_CHAT_STRING_LX"),
 	                                    INI.GetInt("ENTER_CHAT_STRING_LY"), &YellowFont, &WhiteFont);
-	CHATBOX->Active = 1;
+	CHATBOX->Active = true;
 	CHSCR[0] = DSS.addNewGP_VScrollBar(nullptr,
 	                                   INI.GetInt("CHAT_SCROLLER_X"),
 	                                   INI.GetInt("CHAT_SCROLLER_Y"),
 	                                   INI.GetInt("CHAT_SCROLLER_LY"), 1, 0, SCROL.GPID, 0);
-	CHSCR[0]->Visible = 0;
+	CHSCR[0]->Visible = false;
 	int MAXCHLX = INI.GetInt("CHAT_WINDOW_WIDTH");
 
 	CHVIEW[1] = DSS.addChatViewer(nullptr,
@@ -775,7 +775,7 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 	                              INI.GetInt("CHAT_WINDOW_WIDTH"), &ChatMess[1], &ChatSender[1], &NCHATS[1]);
 	CHSCR[1] = DSS.addNewGP_VScrollBar(nullptr, INI.GetInt("CHAT_SCROLLER_X"), INI.GetInt("CHAT_SCROLLER_Y"),
 	                                   INI.GetInt("CHAT_SCROLLER_LY"), 1, 0, SCROL.GPID, 0);
-	CHSCR[1]->Visible = 0;
+	CHSCR[1]->Visible = false;
 
 	CHVIEW[2] = DSS.addChatViewer(nullptr,
 	                              INI.GetInt("CHAT_WINDOW_X"),
@@ -784,7 +784,7 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 	                              INI.GetInt("CHAT_WINDOW_WIDTH"), &ChatMess[2], &ChatSender[2], &NCHATS[2]);
 	CHSCR[2] = DSS.addNewGP_VScrollBar(nullptr, INI.GetInt("CHAT_SCROLLER_X"), INI.GetInt("CHAT_SCROLLER_Y"),
 	                                   INI.GetInt("CHAT_SCROLLER_LY"), 1, 0, SCROL.GPID, 0);
-	CHSCR[2]->Visible = 0;
+	CHSCR[2]->Visible = false;
 
 	VScrollBar* PLVS = DSS.addNewGP_VScrollBar(nullptr,
 	                                           INI.GetInt("PLAYERS_SCROLLER_X"),
@@ -945,7 +945,7 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 
 			if (RunHomePageAnyway && WasHere)
 			{
-				RunHomePageAnyway = 0;
+				RunHomePageAnyway = false;
 				ExplorerOpenRef(0, buf);
 			}
 			free(buf);
@@ -971,7 +971,7 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 				char* buf = (char*)malloc(sz + 1);
 				RBlockRead(FH, buf, sz);
 				buf[sz] = 0;
-				RunHomePageAnyway = 0;
+				RunHomePageAnyway = false;
 				ExplorerOpenRef(0, buf);
 				free(buf);
 				RClose(FH);
@@ -979,12 +979,12 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 		}
 	}
 
-	WasHere = 1;
+	WasHere = true;
 
-	bool PERSONAL = 0;
-	bool newpersonal = 0;
-	bool BIGSIZE = 0;
-	bool FENTER = 1;
+	bool PERSONAL = false;
+	bool newpersonal = false;
+	bool BIGSIZE = false;
+	bool FENTER = true;
 	int T0 = GetTickCount() - 10000;
 	SetCurPtr(0);
 	do
@@ -1026,7 +1026,7 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 				DarkScreen();
 				ShowCentralMessage2C(GetTextByID("ICUNCON"), BOR2.GPID);
 				FlipPages();
-				KeyPressed = 0;
+				KeyPressed = false;
 				do
 				{
 					ProcessMessages();
@@ -1039,17 +1039,17 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 		int NCL = CHVIEW[0]->ScrNy;
 		if (BIGSIZE)
 		{
-			IE_SZUP->Visible = 0;
-			IE_SZUP->Enabled = 0;
-			IE_SZDN->Visible = 1;
-			IE_SZDN->Enabled = 1;
+			IE_SZUP->Visible = false;
+			IE_SZUP->Enabled = false;
+			IE_SZDN->Visible = true;
+			IE_SZDN->Enabled = true;
 		}
 		else
 		{
-			IE_SZUP->Visible = 1;
-			IE_SZUP->Enabled = 1;
-			IE_SZDN->Visible = 0;
-			IE_SZDN->Enabled = 0;
+			IE_SZUP->Visible = true;
+			IE_SZUP->Enabled = true;
+			IE_SZDN->Visible = false;
+			IE_SZDN->Enabled = false;
 		}
 
 		if (LASTCLICKCHATNAME[0])
@@ -1079,41 +1079,41 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 
 		if (CSYS.CurChannel == 0)
 		{
-			IE_CVER->Visible = 1;
-			IE_CVER->Enabled = 1;
-			IE_AVER->Visible = 0;
-			IE_AVER->Enabled = 0;
+			IE_CVER->Visible = true;
+			IE_CVER->Enabled = true;
+			IE_AVER->Visible = false;
+			IE_AVER->Enabled = false;
 		}
 		else
 		{
-			IE_CVER->Visible = 0;
-			IE_CVER->Enabled = 0;
-			IE_AVER->Visible = 1;
-			IE_AVER->Enabled = 1;
+			IE_CVER->Visible = false;
+			IE_CVER->Enabled = false;
+			IE_AVER->Visible = true;
+			IE_AVER->Enabled = true;
 		}
 
 		if (PERSONAL)
 		{
-			CH_PSNL->Visible = 0;
-			CH_PSNL->Enabled = 0;
-			CH_COMN->Visible = 1;
-			CH_COMN->Enabled = 1;
-			CHVIEW[0]->Visible = 1;
-			CHVIEW[0]->Enabled = 1;
-			CHVIEW[1]->Visible = 0;
-			CHVIEW[1]->Enabled = 0;
-			CHVIEW[2]->Visible = 0;
-			CHVIEW[2]->Enabled = 0;
-			newpersonal = 0;
+			CH_PSNL->Visible = false;
+			CH_PSNL->Enabled = false;
+			CH_COMN->Visible = true;
+			CH_COMN->Enabled = true;
+			CHVIEW[0]->Visible = true;
+			CHVIEW[0]->Enabled = true;
+			CHVIEW[1]->Visible = false;
+			CHVIEW[1]->Enabled = false;
+			CHVIEW[2]->Visible = false;
+			CHVIEW[2]->Enabled = false;
+			newpersonal = false;
 		}
 		else
 		{
-			CH_PSNL->Visible = 1;
-			CH_PSNL->Enabled = 1;
-			CH_COMN->Visible = 0;
-			CH_COMN->Enabled = 0;
-			CHVIEW[0]->Visible = 0;
-			CHVIEW[0]->Enabled = 0;
+			CH_PSNL->Visible = true;
+			CH_PSNL->Enabled = true;
+			CH_COMN->Visible = false;
+			CH_COMN->Enabled = false;
+			CHVIEW[0]->Visible = false;
+			CHVIEW[0]->Enabled = false;
 			CHVIEW[1]->Visible = CSYS.CurChannel == 0;
 			CHVIEW[1]->Enabled = CSYS.CurChannel == 0;
 			CHVIEW[2]->Visible = CSYS.CurChannel == 1;
@@ -1125,25 +1125,25 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 			else CH_PSNL->PassiveFrame = 13;
 		}
 
-		for (int i = 0; i < 3; i++)
+		for (auto & i : CHSCR)
 		{
-			CHSCR[i]->Visible = 0;
-			CHSCR[i]->Enabled = 0;
+			i->Visible = false;
+			i->Enabled = false;
 		}
 
-		CC_Vis = 0;
-		CM_Vis = 0;
+		CC_Vis = false;
+		CM_Vis = false;
 
 		char NICK[64];
 		char MESS[512];
 
-		bool adc = 0;
+		bool adc = false;
 
 		while (CSYS.Common[CSYS.CurChannel].RemoveOne(NICK, MESS, 512))
 		{
 			AddChatString(NICK, MESS, MAXCHLX, &YellowFont, ChatMess[CSYS.CurChannel + 1], ChatSender[CSYS.CurChannel + 1],
 			              NCHATS[CSYS.CurChannel + 1], MAXCHATS[CSYS.CurChannel + 1]);
-			adc = 1;
+			adc = true;
 		}
 
 		if (NCHATS[CSYS.CurChannel + 1] > NCL)
@@ -1159,28 +1159,28 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 		}
 		else
 		{
-			CHSCR[CSYS.CurChannel + 1]->Visible = 0;
+			CHSCR[CSYS.CurChannel + 1]->Visible = false;
 			CHSCR[CSYS.CurChannel + 1]->SPos = 0;
 			CHVIEW[CSYS.CurChannel + 1]->ChatDY = 0;
 		}
 
 		if (FENTER)
 		{
-			for (int i = 0; i < 3; i++)
+			for (auto & i : CHSCR)
 			{
-				CHSCR[i]->SPos = CHSCR[i]->SMaxPos;
+				i->SPos = i->SMaxPos;
 			}
-			FENTER = 0;
+			FENTER = false;
 		}
 
-		adc = 0;
+		adc = false;
 		if (CSYS.Private.NMsg)
 		{
-			newpersonal = 1;
+			newpersonal = true;
 			while (CSYS.Private.RemoveOne(NICK, MESS, 512))
 			{
 				AddChatString(NICK, MESS, MAXCHLX, &YellowFont, ChatMess[0], ChatSender[0], NCHATS[0], MAXCHATS[0]);
-				adc = 1;
+				adc = true;
 			}
 		}
 
@@ -1194,7 +1194,7 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 		}
 		else
 		{
-			CHSCR[0]->Visible = 0;
+			CHSCR[0]->Visible = false;
 			CHSCR[0]->SPos = 0;
 			CHVIEW[0]->ChatDY = 0;
 		}
@@ -1234,17 +1234,17 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 
 			if (CSYS.CCH[CSYS.CurChannel].Players[p].Muted)
 			{
-				PL_MUTE->Visible = 0;
-				PL_MUTE->Enabled = 0;
-				PL_HEAR->Visible = 1;
-				PL_HEAR->Enabled = 1;
+				PL_MUTE->Visible = false;
+				PL_MUTE->Enabled = false;
+				PL_HEAR->Visible = true;
+				PL_HEAR->Enabled = true;
 			}
 			else
 			{
-				PL_MUTE->Visible = 1;
-				PL_MUTE->Enabled = 1;
-				PL_HEAR->Visible = 0;
-				PL_HEAR->Enabled = 0;
+				PL_MUTE->Visible = true;
+				PL_MUTE->Enabled = true;
+				PL_HEAR->Visible = false;
+				PL_HEAR->Enabled = false;
 			}
 		}
 		else
@@ -1257,17 +1257,17 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 				strcpy(CURRML, CSYS.AbsPlayers[p].mail);
 				if (CSYS.AbsPlayers[p].Muted)
 				{
-					PL_MUTE->Visible = 0;
-					PL_MUTE->Enabled = 0;
-					PL_HEAR->Visible = 1;
-					PL_HEAR->Enabled = 1;
+					PL_MUTE->Visible = false;
+					PL_MUTE->Enabled = false;
+					PL_HEAR->Visible = true;
+					PL_HEAR->Enabled = true;
 				}
 				else
 				{
-					PL_MUTE->Visible = 1;
-					PL_MUTE->Enabled = 1;
-					PL_HEAR->Visible = 0;
-					PL_HEAR->Enabled = 0;
+					PL_MUTE->Visible = true;
+					PL_MUTE->Enabled = true;
+					PL_HEAR->Visible = false;
+					PL_HEAR->Enabled = false;
 				}
 			}
 		}
@@ -1474,7 +1474,7 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 			               INI.GetInt("EXPLORER_Y") + menu_y_off,
 			               INI.GetInt("EXPLORER_X1") + menu_x_off,
 			               INI.GetInt("EXPLORER_Y1") + menu_y_off + DLY);
-			BIGSIZE = 1;
+			BIGSIZE = true;
 			ItemChoose = -1;
 			for (int i = 0; i < 3; i++)
 			{
@@ -1501,7 +1501,7 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 			               INI.GetInt("EXPLORER_Y") + menu_y_off,
 			               INI.GetInt("EXPLORER_X1") + menu_x_off,
 			               INI.GetInt("EXPLORER_Y1") + menu_y_off);
-			BIGSIZE = 0;
+			BIGSIZE = false;
 			for (int i = 0; i < 3; i++)
 			{
 				CHVIEW[i]->y = CHVIEW[i]->y - DLY;
@@ -1675,13 +1675,13 @@ __declspec( dllexport ) int Process_GSC_ChatWindow(bool Active, RoomInfo* RIF)
 	return false;
 }
 
-bool InRoom = 0;
+bool InRoom = false;
 
 __declspec( dllexport ) void LeaveGSCRoom()
 {
 	if (GRIF)
 	{
-		InRoom = 0;
+		InRoom = false;
 		ExplorerOpenRef(0, "GW|leave");
 		//GRIF=nullptr;
 	}
