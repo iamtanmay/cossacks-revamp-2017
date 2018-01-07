@@ -48,12 +48,12 @@ void sprintAttackInComparison( AdvCharacter* ADC, AdvCharacter* MODIF, char* cc 
 void sprintShield( AdvCharacter* ADC, char* cc )
 {
 	int Ns = 0;
-	for (int i = 0; i < 7; i++)if (ADC->Protection[i])Ns++;
+	for (int i = 0; i < 8; i++)if (ADC->Protection[i])Ns++;
 	int Nn = 0;
 	if (Ns)sprintf( cc, "Общая защита:%d, защита ", ADC->Shield );
 	else sprintf( cc, "Общая защита:%d", ADC->Shield );
 	cc += strlen( cc );
-	for (int i = 0; i < 7; i++)if (ADC->Protection[i])
+	for (int i = 0; i < 8; i++)if (ADC->Protection[i])
 	{
 		Nn++;
 		if (Nn != Ns)sprintf( cc, "от %s:%d, ", SHK[i], ADC->Protection[i] );
@@ -65,7 +65,7 @@ void sprintShieldInComp( AdvCharacter* ADC, AdvCharacter* MODIF, char* cc )
 {
 	cc[0] = 0;
 	int Ns = 0;
-	for (int i = 0; i < 7; i++)if (ADC->Protection[i] != MODIF->Protection[i])Ns++;
+	for (int i = 0; i < 8; i++)if (ADC->Protection[i] != MODIF->Protection[i])Ns++;
 	int Nn = 0;
 	if (ADC->Shield != MODIF->Shield)
 	{
@@ -77,7 +77,7 @@ void sprintShieldInComp( AdvCharacter* ADC, AdvCharacter* MODIF, char* cc )
 		if (Ns)sprintf( cc, "Защита " );
 	};
 	cc += strlen( cc );
-	for (int i = 0; i < 7; i++)if (ADC->Protection[i] != MODIF->Protection[i])
+	for (int i = 0; i < 8; i++)if (ADC->Protection[i] != MODIF->Protection[i])
 	{
 		Nn++;
 		if (Nn != Ns)sprintf( cc, "от %s:%d, ", SHK[i], MODIF->Protection[i] );
@@ -248,12 +248,12 @@ void sprintBriefAttackInComparison( AdvCharacter* ADC, AdvCharacter* MODIF, char
 void sprintBriefShield( AdvCharacter* ADC, char* cc )
 {
 	int Ns = 0;
-	for (int i = 0; i < 7; i++)if (ADC->Protection[i])Ns++;
+	for (int i = 0; i < 8; i++)if (ADC->Protection[i])Ns++;
 	int Nn = 0;
 	if (Ns)sprintf( cc, "%d;", ADC->Shield );
 	else sprintf( cc, "%d", ADC->Shield );
 	cc += strlen( cc );
-	for (int i = 0; i < 7; i++)if (ADC->Protection[i])
+	for (int i = 0; i < 8; i++)if (ADC->Protection[i])
 	{
 		Nn++;
 		if (Nn != Ns)sprintf( cc, "%s:%d;", WKN[i], ADC->Protection[i] );

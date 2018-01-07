@@ -1532,7 +1532,7 @@ void __EndGame( byte NI, byte state )
 		byte mask = NATIONS[NI].NMask;
 		int MaxSC = -1000;
 		int BestID = -1;
-		for ( int i = 0; i < 7; i++ )
+		for ( int i = 0; i < 8; i++ )
 		{
 			if ( NATIONS[i].NMask&mask&&i != NI&&NATIONS[i].VictState == 0 )
 			{
@@ -1549,7 +1549,7 @@ void __EndGame( byte NI, byte state )
 		if ( BestID == -1 )
 		{
 			//need to eliminate all
-			for ( int i = 0; i < 7; i++ )
+			for ( int i = 0; i < 8; i++ )
 			{
 				if ( NATIONS[i].NMask&mask )
 				{

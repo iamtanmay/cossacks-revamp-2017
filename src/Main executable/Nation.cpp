@@ -1243,7 +1243,7 @@ void WinnerControl( bool Anyway )
 		for (int i = 0; i < MAXOBJECT; i++)
 		{
 			OneObject* OB = Group[i];
-			if (OB && UnLockN[OB->NNUM] && OB->NNUM != 7 && !( OB->Sdoxlo && !OB->Hidden ))
+			if (OB && UnLockN[OB->NNUM] && OB->NNUM != 8 && !( OB->Sdoxlo && !OB->Hidden ))
 			{
 				byte USE = OB->newMons->Usage;
 				if (USE == PeasantID)
@@ -1720,7 +1720,7 @@ void EnumPopulation()
 			NMN[OB->NNUM]++;
 		}
 	}
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < 8; i++)
 	{
 		NATIONS[i].AddPopul( NMN[i] );
 	}

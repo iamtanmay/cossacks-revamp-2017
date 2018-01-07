@@ -3115,7 +3115,7 @@ void HandleMultiplayer()
 									int NS = 0;
 									byte ms = 0;
 									byte PColor = PINFO[i].ColorID;
-									for (int v = 0; v < 7; v++)
+									for (int v = 0; v < 8; v++)
 									{
 										if (NATIONS[v].ThereWasUnit && NATIONS[v].VictState == 0 && v != PColor && ( !Erased[v] ))
 										{

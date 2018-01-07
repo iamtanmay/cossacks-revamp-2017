@@ -943,7 +943,7 @@ void CreateSumm()
 {
 	memset( SumSquare, 0, 7 * 4 );
 	memset( SumAccount, 0, 7 * 4 );
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < 8; i++)
 	{
 		byte ms0 = 1 << i;
 		byte ms = NATIONS[i].NMask;
@@ -957,7 +957,7 @@ void CreateSumm()
 			int ss = 0;
 			int sa = 0;
 			int na = 0;
-			for (int j = 0; j < 7; j++)
+			for (int j = 0; j < 8; j++)
 			{
 				if (NATIONS[j].NMask&ms)
 				{
@@ -981,7 +981,7 @@ int GetBestPlayer()
 		int maxn = -1;
 		int maxs = 0;
 		int maxidv = 0;
-		for (int i = 0; i < 7; i++)
+		for (int i = 0; i < 8; i++)
 		{
 			int v = SumSquare[i];
 			if (v > maxs)
@@ -1005,7 +1005,7 @@ int GetBestPlayer()
 			int maxs = 0;
 			int maxidv = 0;
 
-			for (int i = 0; i < 7; i++)
+			for (int i = 0; i < 8; i++)
 			{
 				int v = SumAccount[i];//*10000+CITY[i].Account;
 				if (v > maxs)
@@ -1032,7 +1032,7 @@ int SortPlayers( byte* Res, int* par )
 	SC.CheckSize( 8 );
 	int np = 0;
 	byte usemask = 0;
-	for (int q = 0; q < 7; q++)
+	for (int q = 0; q < 8; q++)
 	{
 		int xx = NatRefTBL[q];
 		if (NATIONS[xx].ThereWasUnit/*NtNUnits[xx]*/)
@@ -1058,7 +1058,7 @@ int SortPlayers( byte* Res, int* par )
 		byte msk = byte( msks[q] );
 		int mp = 0;
 		byte m0 = 1;
-		for (int p = 0; p < 7; p++)
+		for (int p = 0; p < 8; p++)
 		{
 			int xx = NatRefTBL[p];
 			m0 = 1 << xx;
@@ -4977,7 +4977,7 @@ void REPLAY()
 	};
 	ShowLoading();
 	PrepareGameMedia( 0, 0 );
-	for (int j = 0; j < 7; j++)
+	for (int j = 0; j < 8; j++)
 	{
 		CITY[j].LandType = LAND[j];
 		CITY[j].Difficulty = DIFF[j];
@@ -4992,7 +4992,7 @@ void REPLAY()
 	if (lib && !( SCENINF.hLib || n == -1 ))
 	{
 		MISSLIST.CurrentMission = n;
-		for (int i = 0; i < 7; i++)CITY[i].Difficulty = DIFF[i];
+		for (int i = 0; i < 8; i++)CITY[i].Difficulty = DIFF[i];
 		SCENINF.Load( MISSLIST.MISS[n].DLLPath, MISSLIST.MISS[n].Description );
 	}
 }

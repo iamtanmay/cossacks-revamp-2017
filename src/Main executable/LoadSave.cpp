@@ -2885,7 +2885,7 @@ void PreSaveGame( SaveBuf* SB, char* Messtr, int ID )
 	xBlockWrite( SB, &ID, 4 );
 	  
 	int NNN = 0;
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < 8; i++)
 	{
 		if (PINFO[i].name[0])
 		{
@@ -2901,7 +2901,7 @@ void PreSaveGame( SaveBuf* SB, char* Messtr, int ID )
 	xBlockWrite( SB, &mapx, 4 );
 	xBlockWrite( SB, &mapy, 4 );
 
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < 8; i++)
 	{
 		if (PINFO[i].name[0])
 		{

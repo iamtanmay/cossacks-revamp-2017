@@ -709,7 +709,7 @@ void RecordGame::ReadStream( char* Name )
 					PrepareGameMedia( 0, 0 );
 					InitGame();
 					//InitExplosions();
-					for ( int i = 0; i < 7; i++ )
+					for ( int i = 0; i < 8; i++ )
 					{
 						CITY[i].Difficulty = Diff;
 						PINFO[i].ColorID = i;
@@ -753,7 +753,7 @@ void RecordGame::ReadStream( char* Name )
 						InitGame();
 						//InitExplosions();
 						//PrepareToGame();
-						for ( int k = 1; k < 7; k++ )
+						for ( int k = 1; k < 8; k++ )
 						{
 							int nidx = DetermineNationAI( k );
 							if ( nidx != -1 )

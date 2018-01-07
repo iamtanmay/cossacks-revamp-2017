@@ -31,7 +31,7 @@ extern int PeaceTimeLeft;
 extern int SafeMLx;
 extern int SafeMSH;
 extern int TSH;
-#define MAXPLAY 7
+#define MAXPLAY 8
 void EnemyInfo::Clear() {
 	CloseSafeInfo();
 	ClearPlaces();
@@ -334,7 +334,7 @@ word EnemyInfo::SearchDangerousPlaceForEnemy(int* utx, int* uty, int MINR, int M
 	int cy = ty >> 1;
 	int maxx = msx >> 1;
 
-	for (int r = 1; r < 7; r++) {
+	for (int r = 1; r < 8; r++) {
 		char* xi = Rarr[r].xi;
 		char* yi = Rarr[r].yi;
 		int N = Rarr[r].N;

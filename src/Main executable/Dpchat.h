@@ -11,7 +11,7 @@
 #include "dplay.h"
 
 // constants
-const DWORD MAXPLAYERS = 7;			// max no. players in the session
+const DWORD MAXPLAYERS = 8;			// max no. players in the session
 
 // structure used to store DirectPlay information
 typedef struct {

@@ -2636,6 +2636,10 @@ void PreDrawGameProcess()
 		{
 			HandleMission();
 			TutOver = 0;
+			if (!Tutorial)
+			{
+				CITY[7].ProcessCreation();
+			}
 		}
 
 		int xt = ( tmtmt % 256 );
