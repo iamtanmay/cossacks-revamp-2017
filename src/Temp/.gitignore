@@ -1,0 +1,13 @@
+CommCore/
+dmcr/
+IChat/
+IntExplorer
+
+*.bsc
+*.lib
+*.exp
+*.lib
+*.pdb
+
+# Keep IChat.lib as it added in the original repo (circular dependency in the build)
+!IChat.lib
