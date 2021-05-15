@@ -39,121 +39,94 @@ CDeviceCD::~CDeviceCD()
 
 // CDeviceCD message handlers
 MCIDEVICEID glFDeviceID;
+byte currentTrack = 2;
 bool CDeviceCD::Open()
 {
+	/* TODO: Find out why there are 19 track according to Tracks.cd,
+	   when there are only 18 tracks included in the Steam version,
+	   so maybe hardcoding 18 is not needed */
+	for (int i = 0; i < 18; ++i) {
+		char commandString[128];
+		sprintf(commandString, "open \"tracks/Track %d.wav\" type waveaudio alias %d", i+1, TracksMask[i]);
 
-
-	MCI_OPEN_PARMS OPEN_PARAMS;
-
-	OPEN_PARAMS.dwCallback = 0;
-	OPEN_PARAMS.lpstrDeviceType = "CDAudio";
-
-	FError = mciSendCommand(0, MCI_OPEN, MCI_OPEN_TYPE, (DWORD)(LPMCI_OPEN_PARMS)&OPEN_PARAMS);
-
-	if (!FError)
-	{
-		FDeviceID = OPEN_PARAMS.wDeviceID;
-		glFDeviceID = FDeviceID;
-		FOpened = TRUE;
-
-		MCI_SET_PARMS SET_PARAMS;
-
-		SET_PARAMS.dwCallback = 0;
-		SET_PARAMS.dwTimeFormat = MCI_FORMAT_TMSF;
-
-		FError = mciSendCommand(FDeviceID, MCI_SET, MCI_SET_TIME_FORMAT, (DWORD)(LPMCI_SET_PARMS)&SET_PARAMS);
-
-		if (!FError) { ; };
-
-		return TRUE;
-
+		FError = FError | mciSendString(commandString, NULL, 0, NULL);
 	}
-	else
-	{
-		FDeviceID = (MCIDEVICEID)-1;
+
+
+	if (FError) {
 		FOpened = FALSE;
 		return FALSE;
 	}
+
+	FOpened = TRUE;
+	return TRUE;
 }
 
 bool CDeviceCD::Close()
 {
 	if (FOpened)
 	{
-		MCI_GENERIC_PARMS CLOSE_PARAMS;
+		/* TODO: Find out why there are 19 track according to Tracks.cd,
+		   when there are only 18 tracks included in the Steam version,
+		   so maybe hardcoding 18 is not needed */
+		for (int i = 0; i < 18; ++i) {
+			char commandString[128];
+			sprintf(commandString, "close \"tracks/Track %d.wav\"", i + 1);
 
-		CLOSE_PARAMS.dwCallback = 0;
-
-		FError = mciSendCommand(FDeviceID, MCI_CLOSE, 0, (DWORD)(LPMCI_GENERIC_PARMS)&CLOSE_PARAMS);
-
-		if (!FError)
-		{
-			FOpened = FALSE;
-			FDeviceID = (MCIDEVICEID)-1;
-			return TRUE;
+			FError = FError | mciSendString(commandString, NULL, 0, NULL);
 		}
-		else
-			return FALSE;
+		return TRUE;
 	}
-	else
-		return FALSE;
+
+	return FALSE;
 }
 
 bool CDeviceCD::Pause()
 {
 	if (FOpened)
 	{
-		MCI_GENERIC_PARMS PAUSE_PARAMS;
-
-		PAUSE_PARAMS.dwCallback = 0;
-
-		FError = mciSendCommand(FDeviceID, MCI_PAUSE, 0, (DWORD)(LPMCI_GENERIC_PARMS)&PAUSE_PARAMS);
+		char commandString[32];
+		sprintf(commandString, "Pause %d", currentTrack);
+		FError = mciSendString(commandString, NULL, 0, NULL);
 
 		if (!FError)
 			return TRUE;
 		else
 			return FALSE;
 	}
-	else
-		return FALSE;
+	return FALSE;
 }
 
 bool CDeviceCD::Resume()
 {
 	if (FOpened)
 	{
-		MCI_GENERIC_PARMS RESUME_PARAMS;
-
-		RESUME_PARAMS.dwCallback = 0;
-
-		FError = mciSendCommand(FDeviceID, MCI_RESUME, 0, (DWORD)(LPMCI_GENERIC_PARMS)&RESUME_PARAMS);
+		char commandString[32];
+		sprintf(commandString, "Resume %d",currentTrack);
+		FError = mciSendString(commandString, NULL, 0, NULL);
 
 		if (!FError)
 			return TRUE;
 		else
 			return FALSE;
 	}
-	else
-		return FALSE;
+	return FALSE;
 }
 
 bool CDeviceCD::Stop()
 {
 	if (FOpened)
 	{
-		MCI_GENERIC_PARMS STOP_PARAMS;
-
-		STOP_PARAMS.dwCallback = 0;
-
-		FError = mciSendCommand(FDeviceID, MCI_STOP, 0, (DWORD)(LPMCI_GENERIC_PARMS)&STOP_PARAMS);
+		char commandString[32];
+		sprintf(commandString, "Stop %d", currentTrack);
+		FError = mciSendString(commandString, NULL, 0, NULL);
 
 		if (!FError)
 			return TRUE;
 		else
 			return FALSE;
 	}
-	else
-		return FALSE;
+	return FALSE;
 }
 
 DWORD CDeviceCD::GetVolume()
@@ -182,24 +155,16 @@ bool CDeviceCD::Play(DWORD Track)
 {
 	if (FOpened)
 	{
-		MCI_PLAY_PARMS PLAY_PARAMS;
-
-		PLAY_PARAMS.dwCallback = (DWORD)hwnd;
-		PLAY_PARAMS.dwFrom = Track;
-		PLAY_PARAMS.dwTo = Track + 1;
-
-		FError = mciSendCommand(FDeviceID, MCI_PLAY, MCI_NOTIFY | MCI_FROM | MCI_TO, (DWORD)(LPMCI_PLAY_PARMS)&PLAY_PARAMS);
-
-		if (!FError) {
-			FError = mciSendCommand(FDeviceID, MCI_PLAY, MCI_NOTIFY | MCI_FROM, (DWORD)(LPMCI_PLAY_PARMS)&PLAY_PARAMS);
-			return TRUE;
-		}
-		else {
+		char commandString[32];
+		currentTrack = Track;
+		sprintf(commandString, "Play %d notify", currentTrack);
+		FError = mciSendString(commandString, NULL, 0, hwnd);
+		if (FError) {
 			return FALSE;
-		};
+		}
+		return TRUE;
 	}
-	else
-		return FALSE;
+	return FALSE;
 }
 int PrevTrack3 = -1;
 int PrevTrack2 = -1;
@@ -210,7 +175,7 @@ extern int srando();
 void PlayRandomTrack();
 LRESULT CD_MCINotify(WPARAM wFlags, LONG lDevId)
 {
-	if (MCIDEVICEID(lDevId) == glFDeviceID && wFlags == MCI_NOTIFY_SUCCESSFUL)
+	if (wFlags == MCI_NOTIFY_SUCCESSFUL)
 	{
 		//insert here
 		if (NextCommand == -1) {
@@ -227,8 +192,7 @@ LRESULT CD_MCINotify(WPARAM wFlags, LONG lDevId)
 		};
 		return 1;
 	}
-	else
-		return 0;
+	return 0;
 
 }
 CDeviceCD CDPLAY;
@@ -259,11 +223,13 @@ void StopPlayCD()
 	CDPLAY.Stop();
 }
 
+// TODO: make volume settings work
 int GetCDVolume()
 {
 	return (int(CDPLAY.GetVolume()) * 100) >> 16;
 }
 
+// TODO: make volume settings work, find out why it is called even if nothing is changed
 void SetCDVolume(int Vol)
 {
 	CDPLAY.SetVolume(((Vol) * 65535) / 100);
