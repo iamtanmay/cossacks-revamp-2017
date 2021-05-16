@@ -46,10 +46,20 @@ bool CDeviceCD::Open()
 	   when there are only 18 tracks included in the Steam version,
 	   so maybe hardcoding 18 is not needed */
 	for (int i = 0; i < 18; ++i) {
+		char filename[32];
+		sprintf(filename, "tracks/Track %d.wav", i+1);
 		char commandString[128];
-		sprintf(commandString, "open \"tracks/Track %d.wav\" type waveaudio alias %d", i+1, TracksMask[i]);
+		sprintf(commandString, "open \"%s\" type waveaudio alias %d", filename, TracksMask[i]);
 
-		FError = FError | mciSendString(commandString, NULL, 0, NULL);
+		DWORD currentError = mciSendString(commandString, NULL, 0, NULL);
+		if (currentError) {
+			char errorMessage[100];
+			mciGetErrorString(currentError, errorMessage, 100);
+			char ccc[200];
+			sprintf(ccc, "Error code: %u\nError Message: %s\nFile: %s", currentError, errorMessage, filename);
+			MessageBox(NULL, ccc, "CDeviceCD::Open", 0);
+		}
+		FError = FError | currentError;
 	}
 
 
