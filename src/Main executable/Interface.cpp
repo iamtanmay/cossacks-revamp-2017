@@ -6436,7 +6436,9 @@ bool ProcessGameOptions()
 		MMenu.MarkToDraw();
 		MMenu.ProcessDialogs();
 		MMenu.RefreshView();
-		SetCDVolume( MVL->SPos );
+		if (MVL->Zaxvat) {
+			SetCDVolume(MVL->SPos);
+		}
 		if ( PrevPlayMode != ( MUS->CurLine != 0 ) )
 		{
 			PlayMode = MUS->CurLine;
