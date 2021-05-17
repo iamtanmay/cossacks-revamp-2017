@@ -42,6 +42,7 @@ MCIDEVICEID glFDeviceID;
 byte currentTrack = 2;
 bool CDeviceCD::Open()
 {
+	currentVolume = 50;
 	/* TODO: Find out why there are 19 track according to Tracks.cd,
 	   when there are only 18 tracks included in the Steam version,
 	   so maybe hardcoding 18 is not needed */
@@ -49,7 +50,7 @@ bool CDeviceCD::Open()
 		char filename[32];
 		sprintf(filename, "tracks/Track %d.wav", i+1);
 		char commandString[128];
-		sprintf(commandString, "open \"%s\" type waveaudio alias %d", filename, TracksMask[i]);
+		sprintf(commandString, "open \"%s\" type mpegvideo alias %d", filename, TracksMask[i]);
 
 		DWORD currentError = mciSendString(commandString, NULL, 0, NULL);
 		if (currentError) {
@@ -60,6 +61,7 @@ bool CDeviceCD::Open()
 			MessageBox(NULL, ccc, "CDeviceCD::Open", 0);
 		}
 		FError = FError | currentError;
+
 	}
 
 
@@ -141,22 +143,15 @@ bool CDeviceCD::Stop()
 
 DWORD CDeviceCD::GetVolume()
 {
-	CMixer Mixer(MIXERLINE_COMPONENTTYPE_DST_SPEAKERS,
-		MIXERLINE_COMPONENTTYPE_SRC_COMPACTDISC,
-		MIXERCONTROL_CONTROLTYPE_VOLUME);
-
-
-	return Mixer.GetControlValue();
+	return currentVolume;
 }
 
 bool CDeviceCD::SetVolume(DWORD Volume)
 {
-	CMixer Mixer(MIXERLINE_COMPONENTTYPE_DST_SPEAKERS,
-		MIXERLINE_COMPONENTTYPE_SRC_COMPACTDISC,
-		MIXERCONTROL_CONTROLTYPE_VOLUME);
-
-
-	Mixer.SetControlValue(Volume);
+	char commandString[64];
+	sprintf(commandString, "setaudio %d volume to %u", currentTrack, Volume);
+	FError = mciSendString(commandString, NULL, 0, NULL);
+	currentVolume = Volume;
 
 	return 1;
 }
@@ -172,6 +167,7 @@ bool CDeviceCD::Play(DWORD Track)
 		if (FError) {
 			return FALSE;
 		}
+		SetVolume(currentVolume);
 		return TRUE;
 	}
 	return FALSE;
@@ -233,14 +229,12 @@ void StopPlayCD()
 	CDPLAY.Stop();
 }
 
-// TODO: make volume settings work
 int GetCDVolume()
 {
-	return (int(CDPLAY.GetVolume()) * 100) >> 16;
+	return CDPLAY.GetVolume();
 }
 
-// TODO: make volume settings work, find out why it is called even if nothing is changed
 void SetCDVolume(int Vol)
 {
-	CDPLAY.SetVolume(((Vol) * 65535) / 100);
+	CDPLAY.SetVolume(Vol);
 }

@@ -30,4 +30,5 @@ protected:
 	MCIDEVICEID FDeviceID;
 	MCIERROR FError;
 	LRESULT MCINotify(WPARAM wFlags, LONG lDevId);
+	int currentVolume;
 };
