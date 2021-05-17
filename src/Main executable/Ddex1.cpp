@@ -213,6 +213,7 @@ extern int Inform;
 extern int MaxAllowedComputerAI;
 extern int MenuType;
 extern int MidiSound;
+extern void SetCDVolume(int Vol);
 extern int NMyUnits;
 extern int NThemUnits;
 extern int OrderSound;
@@ -3340,6 +3341,8 @@ int PASCAL WinMain(
 			&WarSound, &OrderSound, &OrderSound, &MidiSound,
 			&dummy, &ScrollSpeed, &exFMode, &PlayMode );
 		Gclose( fff );
+
+		SetCDVolume(MidiSound);
 
 		//Set last 'global resolution' according to current mode
 		if (window_mode)

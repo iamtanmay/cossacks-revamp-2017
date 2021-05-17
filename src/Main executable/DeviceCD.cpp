@@ -42,7 +42,6 @@ MCIDEVICEID glFDeviceID;
 byte currentTrack = 2;
 bool CDeviceCD::Open()
 {
-	currentVolume = 500;
 	/* TODO: Find out why there are 19 track according to Tracks.cd,
 	   when there are only 18 tracks included in the Steam version,
 	   so maybe hardcoding 18 is not needed */
