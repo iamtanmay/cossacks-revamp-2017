@@ -42,7 +42,7 @@ MCIDEVICEID glFDeviceID;
 byte currentTrack = 2;
 bool CDeviceCD::Open()
 {
-	currentVolume = 50;
+	currentVolume = 500;
 	/* TODO: Find out why there are 19 track according to Tracks.cd,
 	   when there are only 18 tracks included in the Steam version,
 	   so maybe hardcoding 18 is not needed */
@@ -231,10 +231,10 @@ void StopPlayCD()
 
 int GetCDVolume()
 {
-	return CDPLAY.GetVolume();
+	return CDPLAY.GetVolume() / 10;
 }
 
 void SetCDVolume(int Vol)
 {
-	CDPLAY.SetVolume(Vol);
+	CDPLAY.SetVolume(Vol * 10);
 }
