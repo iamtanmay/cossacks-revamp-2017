@@ -6266,7 +6266,7 @@ bool ProcessMenuOptions()
 			SlowLoadPalette( "2\\agew_1.pal" );
 			pp = 0;
 		}
-		if (MVL->Zaxvat) {
+		if (MVL->IsGrabbed) {
 			SetCDVolume(MVL->SPos);
 		}
 		if ( PrevPlayMode != ( MUS->CurLine != 0 ) )
@@ -6436,7 +6436,7 @@ bool ProcessGameOptions()
 		MMenu.MarkToDraw();
 		MMenu.ProcessDialogs();
 		MMenu.RefreshView();
-		if (MVL->Zaxvat) {
+		if (MVL->IsGrabbed) {
 			SetCDVolume(MVL->SPos);
 		}
 		if ( PrevPlayMode != ( MUS->CurLine != 0 ) )

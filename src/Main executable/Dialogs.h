@@ -177,7 +177,7 @@ public:
 	int sbx, sby, sblx, sbly;
 	int LastTime;
 	int mkly, btnly;
-	bool Zaxvat;
+	bool IsGrabbed;
 	SQPicture* btn_up0;
 	SQPicture* btn_up1;
 	SQPicture* btn_up1p;

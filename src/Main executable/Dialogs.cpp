@@ -1283,9 +1283,9 @@ bool VScrollBar_MouseOver( SimpleDialog* SD )
 	int dt = GetTickCount() - tb->LastTime;
 	if (tb->SMaxPos > 0)
 	{
-		if (!realLpressed)tb->Zaxvat = false;
+		if (!realLpressed)tb->IsGrabbed = false;
 		int my = tb->y + tb->btnly + div( int( tb->sbly - tb->mkly + 2 )*tb->SPos, tb->SMaxPos ).quot;
-		if (!tb->Zaxvat)
+		if (!tb->IsGrabbed)
 		{
 			if (MouseInsL( tb->x, tb->y, tb->sblx, tb->btnly ) && Lpressed&&dt > 150)
 			{
@@ -1325,7 +1325,7 @@ bool VScrollBar_MouseOver( SimpleDialog* SD )
 			{
 				tb->LastTime = GetTickCount();
 				//Lpressed=false;
-				tb->Zaxvat = true;
+				tb->IsGrabbed = true;
 			};
 		}
 		else
@@ -1380,7 +1380,7 @@ VScrollBar* DialogsSystem::addVScrollBar( SimpleDialog* Parent,
 		tb->sbar0 = sbar0;
 		tb->sbar1 = sbar1;
 		tb->marker = marker;
-		tb->Zaxvat = false;
+		tb->IsGrabbed = false;
 		tb->OnDraw = &VScrollBar_Draw;
 		tb->OnMouseOver = &VScrollBar_MouseOver;
 		tb->Enabled = true;
@@ -1425,9 +1425,9 @@ bool HScrollBar_MouseOver( SimpleDialog* SD )
 	int dt = GetTickCount() - tb->LastTime;
 	if (tb->SMaxPos > 0)
 	{
-		if (!realLpressed)tb->Zaxvat = false;
+		if (!realLpressed)tb->IsGrabbed = false;
 		int my = tb->x + tb->btnly + div( int( tb->sbly - tb->mkly + 2 )*tb->SPos, tb->SMaxPos ).quot;
-		if (!tb->Zaxvat)
+		if (!tb->IsGrabbed)
 		{
 			if (MouseInsL( tb->x, tb->y, tb->btnly, tb->sblx ) && Lpressed&&dt > 150)
 			{
@@ -1467,7 +1467,7 @@ bool HScrollBar_MouseOver( SimpleDialog* SD )
 			{
 				tb->LastTime = GetTickCount();
 				//Lpressed=false;
-				tb->Zaxvat = true;
+				tb->IsGrabbed = true;
 			};
 		}
 		else
@@ -1522,7 +1522,7 @@ VScrollBar* DialogsSystem::addHScrollBar( SimpleDialog* Parent,
 		tb->sbar0 = sbar0;
 		tb->sbar1 = sbar1;
 		tb->marker = marker;
-		tb->Zaxvat = false;
+		tb->IsGrabbed = false;
 		tb->OnDraw = &HScrollBar_Draw;
 		tb->OnMouseOver = &HScrollBar_MouseOver;
 		tb->Enabled = true;
@@ -1541,7 +1541,7 @@ bool GP_ScrollBar_OnDraw( SimpleDialog* SD )
 	VScrollBar* SB = (VScrollBar*) SD;
 	if (!( SB->Enabled&&SB->Visible&&SB->SMaxPos > 0 ))
 	{
-		SB->Zaxvat = false;
+		SB->IsGrabbed = false;
 		return false;
 	};
 	if (!SB->SMaxPos)return false;
@@ -1558,19 +1558,19 @@ bool GP_ScrollBar_OnDraw( SimpleDialog* SD )
 		scx = SB->x + SB->ScrDx;
 		scy = SB->y + SB->ScrDy + ( SB->SPos*( SB->LineLy - SB->ScrLy ) ) / SB->SMaxPos;
 	};
-	if (!realLpressed)SB->Zaxvat = false;
-	if (!SB->Zaxvat)
+	if (!realLpressed)SB->IsGrabbed = false;
+	if (!SB->IsGrabbed)
 	{
 		if (Lpressed&&mouseX > scx&&mouseY > scy&&mouseX < scx + SB->ScrLx - 1 && mouseY < scy + SB->ScrLy - 1)
 		{
-			SB->Zaxvat = true;
+			SB->IsGrabbed = true;
 			SB->sbx = mouseX;
 			SB->sby = mouseY;
 			SB->sblx = SB->SPos;
 			Lpressed = false;
 		};
 	};
-	if (SB->Zaxvat)
+	if (SB->IsGrabbed)
 	{
 		int dx = mouseX - SB->sbx;
 		int dy = mouseY - SB->sby;
@@ -1635,7 +1635,7 @@ VScrollBar* DialogsSystem::addGP_ScrollBar( SimpleDialog* Parent, int x, int y, 
 		tb->SPos = Pos;
 		tb->SMaxPos = MaxPos;
 		tb->Active = false;
-		tb->Zaxvat = false;
+		tb->IsGrabbed = false;
 		tb->Enabled = true;
 		tb->OnDraw = &GP_ScrollBar_OnDraw;
 		tb->StartGP_Spr = -1;
@@ -1649,7 +1649,7 @@ bool NewGP_VScrollBar_OnDraw( SimpleDialog* SD )
 	VScrollBar* SB = (VScrollBar*) SD;
 	if (!( SB->Enabled&&SB->Visible&&SB->SMaxPos > 0 ))
 	{
-		//SB->Zaxvat=false;
+		//SB->IsGrabbed=false;
 		return false;
 	};
 	if (!SB->SMaxPos)return false;
@@ -1664,19 +1664,19 @@ bool NewGP_VScrollBar_OnDraw( SimpleDialog* SD )
 	int scx, scy;
 	scx = SB->x;
 	scy = SB->y + SB->btnly + ( SB->SPos*( SB->LineLy - SB->ScrLy ) ) / SB->SMaxPos;
-	if (!realLpressed)SB->Zaxvat = false;
-	if (!SB->Zaxvat)
+	if (!realLpressed)SB->IsGrabbed = false;
+	if (!SB->IsGrabbed)
 	{
 		if (Lpressed&&mouseX > scx&&mouseY > scy&&mouseX < scx + SB->ScrLx - 1 && mouseY < scy + SB->ScrLy - 1)
 		{
-			SB->Zaxvat = true;
+			SB->IsGrabbed = true;
 			SB->sbx = mouseX;
 			SB->sby = mouseY;
 			SB->sblx = SB->SPos;
 			Lpressed = false;
 		};
 	};
-	if (SB->Zaxvat)
+	if (SB->IsGrabbed)
 	{
 		int dx = mouseX - SB->sbx;
 		int dy = mouseY - SB->sby;
@@ -1752,7 +1752,7 @@ VScrollBar* DialogsSystem::addNewGP_VScrollBar( SimpleDialog* Parent, int x, int
 		tb->SPos = Pos;
 		tb->SMaxPos = MaxPos;
 		tb->Active = false;
-		tb->Zaxvat = false;
+		tb->IsGrabbed = false;
 		tb->Enabled = true;
 		tb->btnly = GPS.GetGPHeight( GP_File, Sprite );
 		tb->OnDraw = &NewGP_VScrollBar_OnDraw;
@@ -1792,7 +1792,7 @@ VScrollBar* DialogsSystem::addGP_ScrollBarL( SimpleDialog* Parent, int x, int y,
 		tb->SPos = Pos;
 		tb->SMaxPos = MaxPos;
 		tb->Active = false;
-		tb->Zaxvat = false;
+		tb->IsGrabbed = false;
 		tb->Enabled = true;
 		tb->OnDraw = &GP_ScrollBar_OnDraw;
 		tb->StartGP_Spr = -1;
